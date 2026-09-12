@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDF Book Website — Workstation</title>
+<link rel="stylesheet" href="editor.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="toolbar">
+      <div class="toolbar-group">
+        <span id="brand">Workstation</span>
+        <input id="bookTitleInput" type="text" value="Untitled Book" title="Book title" />
+      </div>
+      <div class="toolbar-group">
+        <button id="newProjectBtn">New</button>
+        <button id="openProjectBtn">Open Project&hellip;</button>
+        <button id="saveProjectBtn">Save Project</button>
+        <button id="importPdfBtn">Import PDF&hellip;</button>
+        <input id="openProjectInput" type="file" accept=".zip" hidden />
+        <input id="importPdfInput" type="file" accept="application/pdf" hidden />
+      </div>
+      <div class="toolbar-group">
+        <button id="undoBtn" title="Undo (Ctrl+Z)">&#8630;</button>
+        <button id="redoBtn" title="Redo (Ctrl+Shift+Z)">&#8631;</button>
+      </div>
+      <div class="toolbar-group">
+        <button id="exportPdfBtn">Export PDF</button>
+        <button id="exportWebsiteBtn" class="primary">Export Website (.zip)</button>
+      </div>
+    </header>
+
+    <div id="body">
+      <aside id="leftPanel">
+        <section class="panel-section">
+          <h3>Pages <span id="pageCount" class="hint-inline"></span></h3>
+          <label class="row"><input id="showTocFieldsInput" type="checkbox" /> Show Table of Contents field</label>
+          <label class="row"><input id="showPagePreviewsInput" type="checkbox" /> Show page previews</label>
+          <div id="pageList"></div>
+          <button id="addPageBtn" class="block">+ Add Page</button>
+          <label class="row" title="Page 1 sits alone, like a book's front cover, instead of pairing with page 2.">
+            <input id="coverFrontInput" type="checkbox" /> Front cover sits alone
+          </label>
+          <label class="row" title="The last page sits alone, like a book's back cover, instead of pairing with the page before it.">
+            <input id="coverBackInput" type="checkbox" /> Back cover sits alone
+          </label>
+        </section>
+        <section class="panel-section">
+          <h3>Book Setup</h3>
+          <label>Units
+            <div class="row">
+              <select id="unitSelect">
+                <option value="in">inches</option>
+                <option value="cm">cm</option>
+                <option value="px">px</option>
+              </select>
+              <span class="hint-inline">at</span>
+              <input id="dpiInput" type="number" min="1" step="1" class="dpi-input" autocomplete="off" />
+              <span class="hint-inline">px/in</span>
+            </div>
+          </label>
+
+          <label>Page size
+            <select id="pageSizePresetInput">
+              <option value="letter">8.5 x 11 (Letter)</option>
+              <option value="quarter-letter-tall">4.25 x 11</option>
+              <option value="half-letter">5.5 x 8.5 (Half Letter)</option>
+              <option value="quarter-letter">4.25 x 5.5 (Quarter Letter)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </label>
+          <div class="grid2">
+            <input id="pageWidthInput" type="number" min="0.1" autocomplete="off" />
+            <input id="pageHeightInput" type="number" min="0.1" autocomplete="off" />
+          </div>
+          <label class="row"><input id="lockRatioInput" type="checkbox" /> Lock width/height ratio</label>
+
+          <label>Margins (top / bottom / inner / outer)</label>
+          <div class="grid2">
+            <input id="marginTopInput" type="number" min="0" title="Top" autocomplete="off" />
+            <input id="marginBottomInput" type="number" min="0" title="Bottom" autocomplete="off" />
+            <input id="marginInnerInput" type="number" min="0" title="Inner (spine side)" autocomplete="off" />
+            <input id="marginOuterInput" type="number" min="0" title="Outer (edge side)" autocomplete="off" />
+          </div>
+          <label class="row"><input id="sameMarginsInput" type="checkbox" /> Same value for all margins</label>
+
+          <label>Grid columns &times; rows</label>
+          <div class="grid2">
+            <input id="gridColumnsInput" type="number" min="1" step="1" title="Columns" autocomplete="off" />
+            <input id="gridRowsInput" type="number" min="1" step="1" title="Rows" autocomplete="off" />
+          </div>
+          <label>Grid color
+            <input id="gridColorInput" type="color" />
+          </label>
+          <label>Grid starts
+            <select id="gridOriginSelect">
+              <option value="page">On the page (full bleed)</option>
+              <option value="margins">Between the margins</option>
+            </select>
+          </label>
+          <label class="row"><input id="gridSnapInput" type="checkbox" /> Snap to grid &amp; margins</label>
+          <label class="row"><input id="gridShowInput" type="checkbox" /> Show grid</label>
+        </section>
+        <section class="panel-section">
+          <h3>Background</h3>
+          <label>Type
+            <select id="backgroundTypeSelect">
+              <option value="color">Color</option>
+              <option value="gradient">Gradient (CSS)</option>
+              <option value="image">Image</option>
+            </select>
+          </label>
+          <input id="backgroundColorInput" type="color" />
+          <input id="backgroundGradientInput" type="text" placeholder="linear-gradient(...)" />
+          <button id="backgroundImageBtn" class="block">Choose Image&hellip;</button>
+          <input id="backgroundImageInput" type="file" accept="image/*" hidden />
+          <label id="backgroundFitLabel">Fit
+            <select id="backgroundFitSelect">
+              <option value="stretch">Stretch</option>
+              <option value="cover">Fill</option>
+              <option value="contain">Fit</option>
+              <option value="repeat">Repeat</option>
+            </select>
+          </label>
+        </section>
+      </aside>
+
+      <main id="canvasArea">
+        <div id="palette">
+          <button data-add="text">+ Text</button>
+          <button data-add="image">+ Image</button>
+          <button data-add="gif">+ GIF</button>
+          <button data-add="link">+ Link</button>
+          <input id="imageFileInput" type="file" accept="image/*" hidden />
+          <input id="gifFileInput" type="file" accept="image/gif" hidden />
+        </div>
+        <div id="spreadViewport">
+          <div id="spread"></div>
+        </div>
+        <div id="zoomControls">
+          <button id="zoomOutBtn" title="Zoom out">&minus;</button>
+          <select id="zoomSelect" title="Zoom level">
+            <option value="0.25">25%</option>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1">100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="3">300%</option>
+          </select>
+          <button id="zoomInBtn" title="Zoom in">+</button>
+          <button id="zoomFitBtn" title="Reset to fit">Fit</button>
+        </div>
+      </main>
+
+      <aside id="rightPanel">
+        <h3>Properties</h3>
+        <div id="propertiesPanel"><p class="hint">Select an object to edit it.</p></div>
+      </aside>
+    </div>
+
+    <footer id="statusBar">
+      <span id="statusText">Ready.</span>
+    </footer>
+  </div>
+
+  <script src="lib/jszip.min.js"></script>
+  <script src="lib/FileSaver.min.js"></script>
+  <script src="lib/jspdf.umd.min.js"></script>
+  <script src="lib/html2canvas.min.js"></script>
+  <script src="lib/pdf.min.js"></script>
+  <script src="lib/page-flip.browser.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

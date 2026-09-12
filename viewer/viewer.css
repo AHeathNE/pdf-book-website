@@ -1,0 +1,161 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: sans-serif;
+  /* Fixed dark ground so the footer never falls back to the browser's
+     default white when it has no background of its own. */
+  background: #14161c;
+}
+
+#stage-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: calc(100% - 56px);
+  /* StPageFlip's internal wrapper can render taller than this box asks
+     for (seen under a very cramped viewport), and without a clip that
+     overflow still sits on top of — and intercepts clicks meant for —
+     the nav bar below, especially whichever control lands directly
+     under the book's horizontal center. */
+  overflow: hidden;
+}
+
+.page {
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.page-inner {
+  position: relative;
+}
+
+#hint {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  pointer-events: none;
+  transition: opacity 0.6s ease;
+}
+
+#hint.hidden { opacity: 0; }
+
+#nav {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+/* Each control is its own light, rounded chip against the dark footer —
+   the footer bar itself carries no background of its own, so these are
+   what stay visible against whatever the book's own background is. */
+#nav button,
+#pageIndicator {
+  background: #ffffff;
+  border: none;
+  color: #000000;
+  border-radius: 10px;
+  font-family: inherit;
+}
+
+#nav button {
+  width: 40px;
+  height: 36px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#pageIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+#nav button:hover { background: #e4e4e4; }
+
+#tocPanel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(280px, 80vw);
+  background: rgba(18, 20, 26, 0.97);
+  color: #eee;
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  z-index: 50;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  font-size: 14px;
+}
+
+#tocPanel.open { transform: translateX(0); }
+
+#tocPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+#tocCloseBtn {
+  background: none;
+  border: none;
+  color: #eee;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+#tocList {
+  list-style: none;
+  overflow-y: auto;
+  padding: 8px 0;
+  margin: 0;
+}
+
+#tocList li button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #ddd;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+#tocList li button:hover { background: rgba(255, 255, 255, 0.08); }
+#tocList li button.current { color: #fff; font-weight: 600; background: rgba(255, 255, 255, 0.06); }

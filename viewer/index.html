@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sample Portfolio</title>
+<link rel="stylesheet" href="viewer.css" />
+</head>
+<body>
+  <div id="stage-wrap">
+    <div id="stage">
+      <div id="book"></div>
+      <div id="hint">Drag or click a bottom corner to turn the page</div>
+      <div id="tocPanel">
+        <div id="tocPanelHeader">
+          <span>Table of Contents</span>
+          <button id="tocCloseBtn" aria-label="Close table of contents">&times;</button>
+        </div>
+        <ul id="tocList"></ul>
+      </div>
+    </div>
+    <div id="nav">
+      <button id="prevBtn" aria-label="Previous page">&#8592;</button>
+      <span id="pageIndicator"></span>
+      <button id="tocToggleBtn" aria-label="Table of contents" hidden>&#9776;</button>
+      <button id="nextBtn" aria-label="Next page">&#8594;</button>
+    </div>
+  </div>
+
+  <script src="lib/page-flip.browser.js"></script>
+  <script type="module" src="viewer.js"></script>
+</body>
+</html>
