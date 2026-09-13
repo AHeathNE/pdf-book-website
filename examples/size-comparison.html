@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Booklet Size Comparison</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #16171c;
+    color: #f0f0f2;
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 40px 20px 64px; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p.lede { color: #9a9ca6; font-size: 14px; margin: 0 0 36px; max-width: 680px; line-height: 1.6; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; color: #9a9ca6; margin: 0 0 16px; }
+  section + section { margin-top: 44px; }
+
+  .row { display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+
+  .card {
+    background: #1e1f26;
+    border: 1px solid #33343d;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 200px;
+  }
+
+  .stage {
+    width: 100%;
+    height: 320px;
+    background: #0c0d11;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .book {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .page {
+    background: #111318;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #f2f2f2;
+    font-size: 12px;
+    font-family: Georgia, serif;
+    text-align: center;
+    padding: 6px;
+  }
+
+  .caption { text-align: center; }
+  .caption .name { font-weight: 600; font-size: 14px; }
+  .caption .dims { color: #9a9ca6; font-size: 12px; margin-top: 2px; }
+  .caption .scale { color: #9a9ca6; font-size: 11px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  .note {
+    margin-top: 28px;
+    font-size: 13px;
+    color: #9a9ca6;
+    line-height: 1.6;
+    max-width: 680px;
+  }
+  .note code {
+    background: #1e1f26;
+    border: 1px solid #33343d;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 12px;
+  }
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid #33343d;
+    font-size: 12px;
+    color: #6b6f7d;
+  }
+  footer a { color: #9a9ca6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Booklet size comparison</h1>
+  <p class="lede">
+    How the viewer scales each page size on screen — true to physical proportion above a legibility
+    floor, so smaller formats read as smaller without becoming hard to read. Height scale =
+    <code>max(0.65, heightIn / 11)</code>, capped at 1, computed from each individual page's own
+    height regardless of layout.
+  </p>
+
+  <section>
+    <h2>Horizontal layout — left / right pages</h2>
+    <div class="row" id="rowHorizontal"></div>
+  </section>
+
+  <section>
+    <h2>Vertical layout — top / bottom pages</h2>
+    <div class="row" id="rowVertical"></div>
+  </section>
+
+  <p class="note">
+    The two 11&Prime;-tall horizontal formats render at full height and differ only in width (their
+    true proportion). 5.5&times;8.5 renders at its true ~77% since that's above the floor;
+    4.25&times;5.5 is floored at 65% rather than its true ~50%. Vertical layout uses the same four
+    physical sizes turned on their side (so a 5.5&times;8.5 booklet becomes an 8.5&times;5.5 page,
+    top/bottom paired) — StPageFlip has no vertical flip mode, so the actual viewer renders this as a
+    normal horizontal book with the whole thing rotated 90&deg; and each page's content counter-rotated
+    to stay upright.
+  </p>
+
+  <footer>
+    Part of the <a href="https://github.com/AHeathNE/pdf-book-website">PDF Book Website</a> workstation + viewer.
+  </footer>
+</div>
+
+<script>
+  const REFERENCE_HEIGHT_IN = 11;
+  const MIN_HEIGHT_SCALE = 0.65;
+  const STAGE_H = 320;
+  const BREATHING_ROOM = 24;
+
+  function heightScale(hIn) {
+    return Math.min(1, Math.max(MIN_HEIGHT_SCALE, hIn / REFERENCE_HEIGHT_IN));
+  }
+
+  const horizontalFormats = [
+    { name: '8.5 x 11', wIn: 8.5, hIn: 11 },
+    { name: '4.25 x 11', wIn: 4.25, hIn: 11 },
+    { name: '5.5 x 8.5', wIn: 5.5, hIn: 8.5 },
+    { name: '4.25 x 5.5', wIn: 4.25, hIn: 5.5 },
+  ];
+
+  // Same four physical sizes, turned on their side for a top/bottom book —
+  // matches the editor's page-size presets, just landscape.
+  const verticalFormats = [
+    { name: '11 x 8.5', wIn: 11, hIn: 8.5 },
+    { name: '11 x 4.25', wIn: 11, hIn: 4.25 },
+    { name: '8.5 x 5.5', wIn: 8.5, hIn: 5.5 },
+    { name: '5.5 x 4.25', wIn: 5.5, hIn: 4.25 },
+  ];
+
+  function renderHorizontalCard(f) {
+    const hs = heightScale(f.hIn);
+    const availH = (STAGE_H - BREATHING_ROOM) * hs;
+    const bookH = availH;
+    const bookW = bookH * (f.wIn / f.hIn);
+
+    const stage = document.createElement('div');
+    stage.className = 'stage';
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.style.width = `${bookW}px`;
+    page.style.height = `${bookH}px`;
+    page.textContent = f.name;
+    stage.appendChild(page);
+    return { stage, hs };
+  }
+
+  function renderVerticalCard(f) {
+    // Vertical fit: width fills available width directly; height is
+    // constrained by fitting TWO stacked pages into the available height
+    // — mirrors viewer.js's fitSingleWidth() for orientation:'vertical'.
+    const hs = heightScale(f.hIn);
+    const availW = STAGE_H * 0.62; // stage is roughly square-ish here; keep books from touching the card edges
+    const availH = (STAGE_H - BREATHING_ROOM) * hs;
+    const byWidth = availW;
+    const byHeight = (availH / 2) * (f.wIn / f.hIn);
+    const pageW = Math.min(byWidth, byHeight);
+    const pageH = pageW * (f.hIn / f.wIn);
+
+    const stage = document.createElement('div');
+    stage.className = 'stage';
+    const book = document.createElement('div');
+    book.className = 'book';
+    for (let i = 0; i < 2; i += 1) {
+      const page = document.createElement('div');
+      page.className = 'page';
+      page.style.width = `${pageW}px`;
+      page.style.height = `${pageH}px`;
+      page.textContent = i === 0 ? 'Top' : 'Bottom';
+      book.appendChild(page);
+    }
+    stage.appendChild(book);
+    return { stage, hs };
+  }
+
+  function buildRow(containerId, formats, renderCard) {
+    const row = document.getElementById(containerId);
+    for (const f of formats) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      const { stage, hs } = renderCard(f);
+      const caption = document.createElement('div');
+      caption.className = 'caption';
+      caption.innerHTML = `
+        <div class="name">${f.name}</div>
+        <div class="dims">${f.wIn}&Prime; &times; ${f.hIn}&Prime;</div>
+        <div class="scale">${Math.round(hs * 100)}% height scale</div>
+      `;
+      card.appendChild(stage);
+      card.appendChild(caption);
+      row.appendChild(card);
+    }
+  }
+
+  buildRow('rowHorizontal', horizontalFormats, renderHorizontalCard);
+  buildRow('rowVertical', verticalFormats, renderVerticalCard);
+</script>
+</body>
+</html>
