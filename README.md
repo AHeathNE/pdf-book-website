@@ -131,6 +131,14 @@ editor/viewer source.
 - **Export Website (.zip)**: packages the current book (as `viewer/` +
   your `book.json` + assets) into a zip. Unzip it and its `index.html` is
   the site — see below to publish it.
+- **Export Standalone HTML**: everything — the viewer, the book data, and
+  every image/GIF (as embedded `data:` URIs) — bundled into one `.html`
+  file. Nothing to unzip, publish, or serve: double-click it, or attach
+  it to an email, and it opens straight into the working flipbook in any
+  browser. Trades that convenience for file size, since embedding images
+  this way runs about a third larger than the same files would be on
+  their own — a good fit for text/photo booklets, less so for anything
+  image-heavy (use Export Website for those instead).
 
 ## Publishing a book to GitHub Pages
 

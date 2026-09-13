@@ -8,6 +8,7 @@ import { autosaveDebounced, restoreFromIndexedDb, saveProjectZip, openProjectZip
 import { importPdf } from './pdf-import.js';
 import { exportPdf } from './export-pdf.js';
 import { exportWebsite } from './export-website.js';
+import { exportStandalone } from './export-standalone.js';
 import { wireClipboardShortcuts } from './clipboard.js';
 
 function setStatus(text) {
@@ -80,6 +81,15 @@ function wireToolbar() {
     } catch (err) {
       console.error(err);
       setStatus(`Failed to export website: ${err.message}`);
+    }
+  });
+
+  document.getElementById('exportStandaloneBtn').addEventListener('click', async () => {
+    try {
+      await exportStandalone();
+    } catch (err) {
+      console.error(err);
+      setStatus(`Failed to export standalone HTML: ${err.message}`);
     }
   });
 

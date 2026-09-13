@@ -3,8 +3,12 @@ import { renderPage, applyStageBackground } from '../shared/renderer.js';
 import { computeSpreadPlan, computeToc } from '../shared/pagination.js';
 
 async function main() {
-  const res = await fetch('book.json');
-  const raw = await res.json();
+  // A standalone single-file export (see editor/js/export-standalone.js)
+  // sets this instead of shipping a book.json to fetch — file:// pages
+  // can't fetch their own directory, which is the whole point of
+  // exporting one. Every other build (local dev, the zip export) has no
+  // such global, so it falls through to the normal fetch unchanged.
+  const raw = window.__PBW_BOOK__ || (await fetch('book.json').then((res) => res.json()));
   const book = normalizeBook(raw);
 
   document.title = book.title;

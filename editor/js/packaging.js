@@ -53,3 +53,44 @@ export function packageAssets(book) {
   const files = [...urlToPath.entries()].map(([url, path]) => ({ path, blob: state.assets.get(url).blob }));
   return { bookJson: clone, files };
 }
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+// Same idea as packageAssets, but for a standalone single-file export:
+// every image/gif is embedded directly as a data: URI instead of a
+// separate asset file, so the exported book is one .html with nothing
+// else to keep alongside it.
+export async function packageAssetsInline(book) {
+  const clone = cloneBook(book);
+  const cache = new Map(); // blob: URL -> data: URL, so a reused asset is only encoded once
+
+  async function rewrite(value) {
+    if (typeof value !== 'string' || !value.startsWith('blob:')) return value;
+    if (cache.has(value)) return cache.get(value);
+    const info = state.assets.get(value);
+    if (!info) return value;
+    const dataUrl = await blobToDataUrl(info.blob);
+    cache.set(value, dataUrl);
+    return dataUrl;
+  }
+
+  if (clone.background && clone.background.type === 'image') {
+    clone.background.value = await rewrite(clone.background.value);
+  }
+  for (const page of clone.pages) {
+    if (page.background && page.background.type === 'image') {
+      page.background.value = await rewrite(page.background.value);
+    }
+    for (const obj of page.objects) {
+      if (obj.type === 'image') obj.src = await rewrite(obj.src);
+    }
+  }
+  return clone;
+}
