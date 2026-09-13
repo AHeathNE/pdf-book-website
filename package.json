@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Desktop wrapper for the PDF Book Website workstation + viewer. The web app itself (editor/, viewer/, shared/) still has no build step — this is only for the optional Electron packaging.",
+  "author": "Andrew Heath <andrew.heath@vcfa.edu>",
   "main": "desktop/main.js",
   "scripts": {
     "start": "electron .",
