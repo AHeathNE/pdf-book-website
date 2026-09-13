@@ -1,17 +1,18 @@
 {
   "version": 1,
   "title": "Sample Portfolio",
-  "pageSize": { "widthPx": 800, "heightPx": 1100, "dpi": 150 },
+  "pageSize": { "widthPx": 1275, "heightPx": 1650, "dpi": 150 },
   "background": { "type": "gradient", "value": "radial-gradient(circle at 50% 40%, #3a3f4b 0%, #14161c 70%)" },
-  "margins": { "top": 60, "bottom": 60, "inner": 70, "outer": 50 },
-  "grid": { "size": 20, "snap": true },
+  "margins": { "top": 90, "bottom": 90, "inner": 105, "outer": 75 },
+  "grid": { "columns": 6, "rows": 8, "color": "#66b3ff", "show": false, "snap": true, "origin": "page" },
+  "covers": { "front": true, "back": true },
   "pages": [
     {
       "id": "page_cover",
       "background": { "type": "color", "value": "#111318" },
       "objects": [
-        { "id": "obj_title", "type": "text", "x": 90, "y": 420, "w": 620, "h": 120, "rot": 0, "z": 1, "content": "Sample Portfolio", "fontFamily": "Georgia, serif", "fontSize": 48, "color": "#f2f2f2", "align": "center" },
-        { "id": "obj_subtitle", "type": "text", "x": 90, "y": 540, "w": 620, "h": 60, "rot": 0, "z": 2, "content": "Click or drag a bottom corner to turn the page", "fontFamily": "Georgia, serif", "fontSize": 18, "color": "#9aa0ab", "align": "center" }
+        { "id": "obj_title", "type": "text", "x": 90, "y": 640, "w": 1095, "h": 160, "rot": 0, "z": 1, "content": "Sample Portfolio", "fontFamily": "Georgia, serif", "fontSize": 90, "color": "#f2f2f2", "align": "center" },
+        { "id": "obj_subtitle", "type": "text", "x": 90, "y": 810, "w": 1095, "h": 70, "rot": 0, "z": 2, "content": "Click or drag a bottom corner to turn the page", "fontFamily": "Georgia, serif", "fontSize": 36, "color": "#9aa0ab", "align": "center" }
       ]
     },
     {
@@ -19,9 +20,9 @@
       "tocLabel": "Photography",
       "background": { "type": "color", "value": "#ffffff" },
       "objects": [
-        { "id": "obj_p1_img", "type": "image", "x": 80, "y": 80, "w": 640, "h": 460, "rot": 0, "z": 1, "src": "assets/sample-photo-1.png", "alt": "Sample photo 1", "link": null },
-        { "id": "obj_p1_caption", "type": "text", "x": 80, "y": 560, "w": 640, "h": 60, "rot": 0, "z": 2, "content": "A photograph placed as an image object.", "fontFamily": "Georgia, serif", "fontSize": 18, "color": "#222222", "align": "left" },
-        { "id": "obj_p1_link", "type": "link", "x": 80, "y": 640, "w": 220, "h": 44, "rot": 0, "z": 3, "href": "https://pages.github.com/", "label": "View full project", "target": "_blank", "bgColor": "#111318", "textColor": "#ffffff" }
+        { "id": "obj_p1_img", "type": "image", "x": 90, "y": 120, "w": 1095, "h": 787, "rot": 0, "z": 1, "src": "assets/sample-photo-1.png", "alt": "Sample photo 1", "link": null },
+        { "id": "obj_p1_caption", "type": "text", "x": 90, "y": 935, "w": 1095, "h": 60, "rot": 0, "z": 2, "content": "A photograph placed as an image object.", "fontFamily": "Georgia, serif", "fontSize": 34, "color": "#222222", "align": "left" },
+        { "id": "obj_p1_link", "type": "link", "x": 90, "y": 1015, "w": 300, "h": 64, "rot": 0, "z": 3, "href": "https://pages.github.com/", "label": "View full project", "target": "_blank", "bgColor": "#111318", "textColor": "#ffffff" }
       ]
     },
     {
@@ -29,9 +30,9 @@
       "tocLabel": "Mixed Media",
       "background": { "type": "color", "value": "#ffffff" },
       "objects": [
-        { "id": "obj_p2_img", "type": "image", "x": 80, "y": 80, "w": 640, "h": 460, "rot": 0, "z": 1, "src": "assets/sample-photo-2.png", "alt": "Sample photo 2", "link": null },
-        { "id": "obj_p2_gif", "type": "image", "x": 80, "y": 570, "w": 300, "h": 180, "rot": 0, "z": 2, "src": "assets/sample-animation.gif", "alt": "Animated GIF sample", "link": null },
-        { "id": "obj_p2_text", "type": "text", "x": 400, "y": 570, "w": 320, "h": 180, "rot": 0, "z": 3, "content": "Pages can hold text, links, PNGs, and animated GIFs together, since each page is real HTML — not a flattened image.", "fontFamily": "Georgia, serif", "fontSize": 17, "color": "#222222", "align": "left" }
+        { "id": "obj_p2_img", "type": "image", "x": 90, "y": 120, "w": 1095, "h": 787, "rot": 0, "z": 1, "src": "assets/sample-photo-2.png", "alt": "Sample photo 2", "link": null },
+        { "id": "obj_p2_gif", "type": "image", "x": 90, "y": 935, "w": 420, "h": 260, "rot": 0, "z": 2, "src": "assets/sample-animation.gif", "alt": "Animated GIF sample", "link": null },
+        { "id": "obj_p2_text", "type": "text", "x": 550, "y": 935, "w": 635, "h": 260, "rot": 0, "z": 3, "content": "Pages can hold text, links, PNGs, and animated GIFs together, since each page is real HTML — not a flattened image.", "fontFamily": "Georgia, serif", "fontSize": 32, "color": "#222222", "align": "left" }
       ]
     },
     {
@@ -39,7 +40,7 @@
       "tocLabel": "Colophon",
       "background": { "type": "color", "value": "#111318" },
       "objects": [
-        { "id": "obj_back_text", "type": "text", "x": 90, "y": 500, "w": 620, "h": 80, "rot": 0, "z": 1, "content": "Built with the PDF Book Website workstation.", "fontFamily": "Georgia, serif", "fontSize": 20, "color": "#9aa0ab", "align": "center" }
+        { "id": "obj_back_text", "type": "text", "x": 90, "y": 760, "w": 1095, "h": 100, "rot": 0, "z": 1, "content": "Built with the PDF Book Website workstation.", "fontFamily": "Georgia, serif", "fontSize": 38, "color": "#9aa0ab", "align": "center" }
       ]
     }
   ]
