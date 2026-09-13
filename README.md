@@ -15,6 +15,7 @@ file directly and see the result.
 shared/    data model + DOM renderer shared by both apps below
 viewer/    the flipbook itself — the thing you publish to GitHub Pages
 editor/    the workstation: a browser-based layout tool that builds the book
+desktop/   optional Electron wrapper — see "Desktop app" below
 ```
 
 ## Running it locally
@@ -42,6 +43,39 @@ hard-refresh; that isn't a concern once a book is exported and published
 other static server works too (`npx serve`, VS Code's Live Server, etc.),
 just make sure caching is off if you're actively editing the
 editor/viewer source.
+
+## Desktop app (Electron)
+
+The workstation can also run as a native window instead of a browser tab —
+same app, unchanged, just wrapped. This is the only part of the project
+that needs Node/npm; the web app itself (`editor/`, `viewer/`, `shared/`)
+still has no build step and works exactly as described above regardless.
+
+```bash
+npm install   # pulls in Electron itself — a one-time few-hundred-MB download
+npm start
+```
+
+That opens straight into the workstation in its own window. Under the
+hood, `desktop/main.js` starts the same kind of local static server as
+`serve.py` (`desktop/server.js`, on a fixed port so IndexedDB autosave and
+your saved preferences persist across launches) and points an Electron
+window at it — the app still can't be opened via a bare `file://` double
+click, for the same ES-module/`fetch()` reasons as running it in a browser.
+
+Exports (PDF, website zip, standalone HTML, Save Project) land in your
+normal OS Downloads folder, same as they would from a browser tab.
+
+To build an installable package for this machine:
+
+```bash
+npm run dist:linux   # produces an AppImage and a .deb in dist/
+```
+
+The `build` config in `package.json` is written to be platform-agnostic —
+building for Windows/Mac from a machine running that OS is just
+`electron-builder --win` / `--mac` with no code changes, though this
+hasn't been tried yet.
 
 ## Using the workstation (`editor/`)
 
