@@ -284,6 +284,14 @@ function initBookSetup() {
     commit((book) => { book.orientation = e.target.value; });
   });
 
+  document.getElementById('swapDimensionsBtn').addEventListener('click', () => {
+    commit((book) => {
+      const { widthPx, heightPx } = book.pageSize;
+      book.pageSize.widthPx = heightPx;
+      book.pageSize.heightPx = widthPx;
+    });
+  });
+
   document.getElementById('pageSizePresetInput').addEventListener('change', (e) => {
     const preset = PAGE_SIZE_PRESETS.find((p) => p.id === e.target.value);
     if (!preset) return; // 'custom' — leave the current size as-is

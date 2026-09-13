@@ -58,6 +58,20 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
 }
 .grid2 input { min-width: 0; }
 
+.page-size-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 6px;
+  margin-top: 4px;
+  align-items: center;
+}
+.page-size-row input { min-width: 0; }
+#swapDimensionsBtn {
+  padding: 4px 6px;
+  font-size: 14px;
+  line-height: 1;
+}
+
 .hint-inline { font-size: 11px; color: var(--text-dim); flex: 0 0 auto; white-space: nowrap; }
 .dpi-input { flex: 0 0 56px; }
 
@@ -152,16 +166,22 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
   flex: 1 1 auto;
   overflow: auto;
   display: flex;
-  align-items: center;
-  justify-content: center;
   padding: 24px;
 }
 
+/* Centered with margin:auto on #spread itself rather than align-items/
+   justify-content on #spreadViewport — that flexbox centering only makes
+   the *trailing* half of any overflow scrollable (confirmed the hard way
+   in the viewer's own zoom: at high zoom, scrolling would hit a wall
+   partway up/left of the actual content instead of reaching the far
+   edge). margin:auto centering doesn't have that bug in either axis. */
 #spread {
   display: flex;
   gap: 3px;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   background: #000;
+  margin: auto;
+  flex-shrink: 0;
 }
 #spread.spread--vertical { flex-direction: column; }
 
