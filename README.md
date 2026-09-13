@@ -66,13 +66,31 @@ editor/viewer source.
   just because you bumped DPI up for a sharper export. Unit choice is just a
   display preference — it isn't saved with the project.
 - **Book Setup**: page size (with an optional **lock ratio** checkbox so
-  editing width scales height proportionally, and vice versa), margins
-  (top/bottom/inner/outer — inner faces the spine and mirrors between
-  left/right pages; check **same value for all margins** to edit all four
-  together), a grid defined by **columns × rows** (not a fixed spacing) with
-  its own **color** and whether it starts **on the page** (full bleed) or
+  editing width scales height proportionally, and vice versa, and a swap
+  button between the two fields to flip a page between portrait and
+  landscape without retyping either number), margins (top/bottom/inner/
+  outer — inner faces the spine and mirrors between facing pages; check
+  **same value for all margins** to edit all four together), a grid
+  defined by **columns × rows** (not a fixed spacing) with its own
+  **color** and whether it starts **on the page** (full bleed) or
   **between the margins**, and whether grid/margin snapping and the grid
   overlay are on.
+- **Page layout**: **Horizontal** (the default — pages pair left/right
+  like a normal book) or **Vertical** (pages pair top/bottom instead — a
+  landscape page stacked on another landscape page). Margins reinterpret
+  accordingly: inner/outer always follows whichever axis pages actually
+  face each other across, so in vertical layout the top/bottom margin
+  fields become the fixed left/right margins instead. Since the flip
+  library itself only ever turns pages left/right, a vertical book is
+  rendered as a normal one rotated 90° with each page's content
+  counter-rotated to stay upright — the published site's corner-drag/
+  click turning still works the same way, it just reads as up/down.
+- **Zoom** (bottom-right of the canvas): zooms the editing view only —
+  independent of the book's actual size/DPI — from 25% up to 300%, with
+  a **Fit** button to reset. The published viewer has its own zoom
+  control too (top-right of the book, 100%–300% since "fit" is already
+  a reader's natural starting point), for getting a closer look at a
+  page; the book scrolls/pans while zoomed in.
 - **Background**: the color/gradient/image shown behind the book itself
   (not the pages) when the site is published — now live-previewed behind
   the canvas in the editor too. An image background has a **Fit**
