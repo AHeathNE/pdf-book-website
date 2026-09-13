@@ -21,17 +21,40 @@ html, body {
 
 #stage {
   position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   height: calc(100% - 56px);
+}
+
+/* Centers the book same as #stage always did, but as its own element so
+   zooming in can make #book actually larger than this box (not just
+   visually scaled — a CSS transform alone doesn't produce real scrollable
+   overflow) and still let the reader pan to see the overflow, without
+   #hint/#tocPanel — both absolutely positioned against #stage — drifting
+   along with that scroll. */
+#bookScroll {
+  position: absolute;
+  inset: 0;
+  display: flex;
   /* StPageFlip's internal wrapper can render taller than this box asks
      for (seen under a very cramped viewport), and without a clip that
      overflow still sits on top of — and intercepts clicks meant for —
      the nav bar below, especially whichever control lands directly
-     under the book's horizontal center. */
-  overflow: hidden;
+     under the book's horizontal center. auto (not hidden) additionally
+     lets a zoomed-in book scroll instead of just clipping. */
+  overflow: auto;
+}
+/* Centering #book with align-items/justify-content on #bookScroll instead
+   of this would only make the trailing half of any overflow (right/
+   bottom) scrollable — a well-known flexbox quirk — leaving the leading
+   half permanently stuck off-screen with no way to pan to it. Auto
+   margins on the item itself center it the same way but scroll fully in
+   both directions once it's larger than the viewport. */
+#book {
+  margin: auto;
+  /* Without this, flexbox's default shrink-to-fit would squeeze #book
+     down to fit #bookScroll instead of letting it overflow (the entire
+     point of zooming past fit) whenever it's larger than the viewport. */
+  flex-shrink: 0;
 }
 
 .page {
@@ -41,6 +64,41 @@ html, body {
 
 .page-inner {
   position: relative;
+}
+
+#zoomControls {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  z-index: 20;
+}
+#zoomControls button,
+#zoomIndicator {
+  background: #ffffff;
+  border: none;
+  color: #000000;
+  border-radius: 10px;
+  font-family: inherit;
+}
+#zoomControls button {
+  width: 32px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 16px;
+}
+#zoomControls button:hover { background: #e4e4e4; }
+#zoomIndicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 #hint {

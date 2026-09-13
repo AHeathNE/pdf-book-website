@@ -23,6 +23,7 @@ async function main() {
   // window. So each rebuild creates a fresh child inside the host instead
   // of reusing one across destroy() calls.
   const bookHost = document.getElementById('book');
+  const bookScroll = document.getElementById('bookScroll');
   const indicator = document.getElementById('pageIndicator');
   const hint = document.getElementById('hint');
   const { widthPx, heightPx, dpi } = book.pageSize;
@@ -106,6 +107,16 @@ async function main() {
     return Math.min(1, Math.max(MIN_HEIGHT_SCALE, heightIn / REFERENCE_HEIGHT_IN));
   }
 
+  // Reader-controlled zoom, on top of the fit-to-viewport size below —
+  // "100%" means fit, same as the only behavior before this existed.
+  // Unlike the editor's zoom this never goes below 100%: fit is already
+  // the "see the whole book" baseline for a reader, so there's nothing
+  // useful below it. Deliberately resizes the actual book (not just a
+  // CSS transform) so #bookScroll gets real scrollable overflow to pan
+  // through — a transform's visual overflow isn't scrollable at all.
+  const ZOOM_STEPS = [1, 1.25, 1.5, 2, 3];
+  let zoomLevel = ZOOM_STEPS[0];
+
   // The book has a fixed page aspect ratio but must still fit whatever
   // viewport it's shown in, so we compute an explicit pixel size that fits
   // the stage (accounting for a two-page spread needing double space along
@@ -113,49 +124,86 @@ async function main() {
   // size, rebuilding on resize rather than letting PageFlip's own
   // responsive CSS fight for space it can't see.
   function fitSingleWidth() {
-    const availW = stage.clientWidth;
-    const availH = (stage.clientHeight - VERTICAL_BREATHING_ROOM) * heightScaleFactor();
+    const availW = bookScroll.clientWidth;
+    const availH = (bookScroll.clientHeight - VERTICAL_BREATHING_ROOM) * heightScaleFactor();
+    let base;
     if (vertical) {
       const byWidth = availW;
       const byHeight = (availH / 2) * (widthPx / heightPx);
-      return Math.max(120, Math.min(byWidth, byHeight));
+      base = Math.max(120, Math.min(byWidth, byHeight));
+    } else {
+      const byHeight = availH * (widthPx / heightPx);
+      const byWidth = availW / 2;
+      base = Math.max(120, Math.min(byHeight, byWidth));
     }
-    const byHeight = availH * (widthPx / heightPx);
-    const byWidth = availW / 2;
-    return Math.max(120, Math.min(byHeight, byWidth));
+    return base * zoomLevel;
   }
 
   function rebuild() {
     const singleW = fitSingleWidth();
     const singleH = singleW * (heightPx / widthPx);
 
-    if (pageFlip) pageFlip.destroy(); // removes the old bookEl — it's being replaced anyway
+    // destroy() only removes whatever element StPageFlip itself was
+    // mounted on — bookEl for a horizontal book, but just the inner
+    // flipMount for a vertical one — so it can't be relied on to clean up
+    // the outer bookEl wrapper in the vertical case. Clearing bookHost
+    // directly handles both.
+    if (pageFlip) pageFlip.destroy();
+    bookHost.innerHTML = '';
     bookEl = document.createElement('div');
     bookHost.appendChild(bookEl);
+
+    // The element actually handed to StPageFlip — bookEl itself for a
+    // normal horizontal book, or a separate inner wrapper for a vertical
+    // one (see below).
+    let flipMount = bookEl;
 
     if (vertical) {
       // StPageFlip has no vertical/top-bottom flip mode at all — only the
       // usual horizontal left/right. So this hands it a completely normal
       // book (width/height swapped: what StPageFlip thinks is one
       // "portrait" page is actually our landscape page turned on its
-      // side) and rotates the whole container 90deg, turning its normal
+      // side) and rotates the whole thing 90deg, turning its normal
       // left/right flip into what reads as a top/bottom one. Each page's
       // own content is counter-rotated in buildPageElements() to stay
-      // upright. bookEl needs an explicit size for the translate/rotate
-      // centering below to work (StPageFlip only manages its own internal
-      // children's styles, never the container it's given, so this
-      // survives untouched).
-      bookEl.style.position = 'absolute';
-      bookEl.style.top = '50%';
-      bookEl.style.left = '50%';
-      bookEl.style.width = `${singleH * 2}px`;
-      bookEl.style.height = `${singleW}px`;
-      bookEl.style.transform = 'translate(-50%, -50%) rotate(90deg)';
+      // upright.
+      //
+      // The rotation lives on an inner `flipMount`, not bookEl itself,
+      // because `transform` never factors into an element's scrollable
+      // overflow (that's computed from pre-transform layout geometry) —
+      // if bookEl were the rotated element, #bookScroll would size its
+      // scrollable area from bookEl's *unrotated* footprint, which is
+      // width/height-swapped from what's actually visible, breaking
+      // panning at any zoom past fit. So bookEl instead stays a plain,
+      // untransformed box sized to the true post-rotation footprint, and
+      // only flipMount inside it — fully contained within bookEl's
+      // already-correct size — carries the rotation.
+      //
+      // bookEl is deliberately a normal (position:relative, not absolute)
+      // child of #book here, leaving #book's own flex + margin:auto (see
+      // viewer.css) to do the actual centering — position:absolute
+      // centering (inset:0 + margin:auto, or top/left:50% + a translate)
+      // turns out to only make the *trailing* half of vertical overflow
+      // scrollable in this browser, silently capping how far a reader can
+      // pan down into a zoomed-in vertical book; a flex item's own
+      // auto-margin centering doesn't have that bug in either axis.
+      bookEl.style.position = 'relative';
+      bookEl.style.width = `${singleW}px`;
+      bookEl.style.height = `${singleH * 2}px`;
+
+      flipMount = document.createElement('div');
+      flipMount.style.position = 'absolute';
+      flipMount.style.top = '50%';
+      flipMount.style.left = '50%';
+      flipMount.style.width = `${singleH * 2}px`;
+      flipMount.style.height = `${singleW}px`;
+      flipMount.style.transform = 'translate(-50%, -50%) rotate(90deg)';
+      bookEl.appendChild(flipMount);
     }
 
-    buildPageElements(bookEl, singleW / widthPx);
+    buildPageElements(flipMount, singleW / widthPx);
 
-    pageFlip = new St.PageFlip(bookEl, {
+    pageFlip = new St.PageFlip(flipMount, {
       width: vertical ? singleH : singleW,
       height: vertical ? singleW : singleH,
       size: 'fixed',
@@ -178,7 +226,19 @@ async function main() {
       useMouseEvents: true,
       drawShadow: true,
     });
-    pageFlip.loadFromHTML(bookEl.querySelectorAll('.page'));
+    pageFlip.loadFromHTML(flipMount.querySelectorAll('.page'));
+
+    // StPageFlip forces the first page (whenever showCover is on) and a
+    // trailing solo last page to "hard" density internally on load —
+    // regardless of the data-density we set — giving covers a stiff,
+    // flat flip instead of the soft paper curl every other page gets.
+    // That's the norm for real book covers, but not the effect we want
+    // here, so it's overridden back to soft right after load.
+    const collection = pageFlip.getPageCollection();
+    const totalPages = flipMount.querySelectorAll('.page').length;
+    if (totalPages > 0) collection.getPage(0).setDensity('soft');
+    if (totalPages > 1) collection.getPage(totalPages - 1).setDensity('soft');
+
     if (currentPageIndex > 0) pageFlip.turnToPage(currentPageIndex);
 
     pageFlip.on('flip', (e) => {
@@ -259,6 +319,26 @@ async function main() {
   window.addEventListener('keydown', (e) => {
     if (e.key === nextKey) pageFlip.flipNext();
     if (e.key === prevKey) pageFlip.flipPrev();
+  });
+
+  const zoomIndicator = document.getElementById('zoomIndicator');
+  function setZoom(z) {
+    zoomLevel = Math.min(ZOOM_STEPS[ZOOM_STEPS.length - 1], Math.max(ZOOM_STEPS[0], z));
+    zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
+    rebuild();
+    // Center the initial view on whatever's now overflowing, rather than
+    // leaving the reader looking at just the top-left corner of a
+    // zoomed-in page.
+    bookScroll.scrollLeft = (bookScroll.scrollWidth - bookScroll.clientWidth) / 2;
+    bookScroll.scrollTop = (bookScroll.scrollHeight - bookScroll.clientHeight) / 2;
+  }
+  document.getElementById('zoomInBtn').addEventListener('click', () => {
+    const next = ZOOM_STEPS.find((s) => s > zoomLevel + 0.001);
+    setZoom(next === undefined ? ZOOM_STEPS[ZOOM_STEPS.length - 1] : next);
+  });
+  document.getElementById('zoomOutBtn').addEventListener('click', () => {
+    const prev = [...ZOOM_STEPS].reverse().find((s) => s < zoomLevel - 0.001);
+    setZoom(prev === undefined ? ZOOM_STEPS[0] : prev);
   });
 
   // A plain window resize listener misses internal layout shifts that
