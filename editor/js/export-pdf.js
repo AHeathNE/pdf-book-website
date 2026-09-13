@@ -42,6 +42,12 @@ export async function exportPdf() {
   const { widthPx, heightPx, dpi } = book.pageSize;
   const wPt = (widthPx * 72) / dpi;
   const hPt = (heightPx * 72) / dpi;
+  // jsPDF defaults to portrait and silently swaps a wider-than-tall
+  // `format` array to match, regardless of the array's own order — never
+  // noticed before since every book was portrait-shaped anyway, but a
+  // landscape page (e.g. a vertical/top-bottom book) needs this spelled
+  // out explicitly or every page comes out rotated 90deg from the editor.
+  const orientation = wPt >= hPt ? 'landscape' : 'portrait';
 
   const offscreen = document.createElement('div');
   offscreen.style.position = 'fixed';
@@ -87,8 +93,8 @@ export async function exportPdf() {
       }
 
       const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-      if (!doc) doc = new jsPDF({ unit: 'pt', format: [wPt, hPt] });
-      else doc.addPage([wPt, hPt]);
+      if (!doc) doc = new jsPDF({ unit: 'pt', format: [wPt, hPt], orientation });
+      else doc.addPage([wPt, hPt], orientation);
       doc.addImage(dataUrl, 'JPEG', 0, 0, wPt, hPt);
     }
     const name = (book.title || 'book').replace(/[^a-zA-Z0-9_.-]/g, '_');

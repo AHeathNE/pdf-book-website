@@ -26,6 +26,8 @@ async function main() {
   const indicator = document.getElementById('pageIndicator');
   const hint = document.getElementById('hint');
   const { widthPx, heightPx, dpi } = book.pageSize;
+  const vertical = book.orientation === 'vertical';
+  hint.textContent = vertical ? 'Drag or click a corner to turn the page' : 'Drag or click a bottom corner to turn the page';
 
   let pageFlip = null;
   let bookEl = null;
@@ -56,8 +58,27 @@ async function main() {
       inner.className = 'page-inner';
       inner.style.width = `${widthPx}px`;
       inner.style.height = `${heightPx}px`;
-      inner.style.transformOrigin = 'top left';
-      inner.style.transform = `scale(${scale})`;
+      if (vertical) {
+        // StPageFlip only ever flips left/right, so a vertical book is
+        // rendered as a completely normal horizontal one and the whole
+        // thing is rotated 90deg in rebuild() to turn that into a
+        // top/bottom flip. Each page's own content has to be
+        // counter-rotated here so it reads upright despite that — see the
+        // matching comment in rebuild() for the full picture. Centering
+        // (rather than a top-left-anchored rotation) sidesteps having to
+        // hand-derive an offset: a box rotated 90deg about its own center
+        // always lands with the same footprint a swapped-dimension box
+        // would, so it exactly fills this now width/height-swapped `.page`
+        // slot with no residual offset.
+        inner.style.position = 'absolute';
+        inner.style.top = '50%';
+        inner.style.left = '50%';
+        inner.style.transformOrigin = 'center center';
+        inner.style.transform = `translate(-50%, -50%) rotate(-90deg) scale(${scale})`;
+      } else {
+        inner.style.transformOrigin = 'top left';
+        inner.style.transform = `scale(${scale})`;
+      }
       pageEl.appendChild(inner);
       if (pageData) renderPage(pageData, inner, { editable: false });
 
@@ -87,13 +108,18 @@ async function main() {
 
   // The book has a fixed page aspect ratio but must still fit whatever
   // viewport it's shown in, so we compute an explicit pixel size that fits
-  // the stage (accounting for a two-page spread being twice as wide as a
-  // single page) and pin PageFlip's min/max to that exact size, rebuilding
-  // on resize rather than letting PageFlip's own responsive CSS fight for
-  // vertical space it can't see.
+  // the stage (accounting for a two-page spread needing double space along
+  // whichever axis pages pair on) and pin PageFlip's min/max to that exact
+  // size, rebuilding on resize rather than letting PageFlip's own
+  // responsive CSS fight for space it can't see.
   function fitSingleWidth() {
     const availW = stage.clientWidth;
     const availH = (stage.clientHeight - VERTICAL_BREATHING_ROOM) * heightScaleFactor();
+    if (vertical) {
+      const byWidth = availW;
+      const byHeight = (availH / 2) * (widthPx / heightPx);
+      return Math.max(120, Math.min(byWidth, byHeight));
+    }
     const byHeight = availH * (widthPx / heightPx);
     const byWidth = availW / 2;
     return Math.max(120, Math.min(byHeight, byWidth));
@@ -106,16 +132,37 @@ async function main() {
     if (pageFlip) pageFlip.destroy(); // removes the old bookEl — it's being replaced anyway
     bookEl = document.createElement('div');
     bookHost.appendChild(bookEl);
+
+    if (vertical) {
+      // StPageFlip has no vertical/top-bottom flip mode at all — only the
+      // usual horizontal left/right. So this hands it a completely normal
+      // book (width/height swapped: what StPageFlip thinks is one
+      // "portrait" page is actually our landscape page turned on its
+      // side) and rotates the whole container 90deg, turning its normal
+      // left/right flip into what reads as a top/bottom one. Each page's
+      // own content is counter-rotated in buildPageElements() to stay
+      // upright. bookEl needs an explicit size for the translate/rotate
+      // centering below to work (StPageFlip only manages its own internal
+      // children's styles, never the container it's given, so this
+      // survives untouched).
+      bookEl.style.position = 'absolute';
+      bookEl.style.top = '50%';
+      bookEl.style.left = '50%';
+      bookEl.style.width = `${singleH * 2}px`;
+      bookEl.style.height = `${singleW}px`;
+      bookEl.style.transform = 'translate(-50%, -50%) rotate(90deg)';
+    }
+
     buildPageElements(bookEl, singleW / widthPx);
 
     pageFlip = new St.PageFlip(bookEl, {
-      width: singleW,
-      height: singleH,
+      width: vertical ? singleH : singleW,
+      height: vertical ? singleW : singleH,
       size: 'fixed',
-      minWidth: singleW,
-      maxWidth: singleW,
-      minHeight: singleH,
-      maxHeight: singleH,
+      minWidth: vertical ? singleH : singleW,
+      maxWidth: vertical ? singleH : singleW,
+      minHeight: vertical ? singleW : singleH,
+      maxHeight: vertical ? singleW : singleH,
       showCover,
       // For 'fixed' size, StPageFlip sizes its own wrapper to
       // `width * (usePortrait ? 1 : 2)` and then falls back to portrait
@@ -198,12 +245,20 @@ async function main() {
 
   rebuild();
 
-  document.getElementById('prevBtn').addEventListener('click', () => pageFlip.flipPrev());
-  document.getElementById('nextBtn').addEventListener('click', () => pageFlip.flipNext());
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (vertical) {
+    prevBtn.innerHTML = '&#8593;'; // up arrow
+    nextBtn.innerHTML = '&#8595;'; // down arrow
+  }
+  prevBtn.addEventListener('click', () => pageFlip.flipPrev());
+  nextBtn.addEventListener('click', () => pageFlip.flipNext());
 
+  const nextKey = vertical ? 'ArrowDown' : 'ArrowRight';
+  const prevKey = vertical ? 'ArrowUp' : 'ArrowLeft';
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') pageFlip.flipNext();
-    if (e.key === 'ArrowLeft') pageFlip.flipPrev();
+    if (e.key === nextKey) pageFlip.flipNext();
+    if (e.key === prevKey) pageFlip.flipPrev();
   });
 
   // A plain window resize listener misses internal layout shifts that

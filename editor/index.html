@@ -76,7 +76,14 @@
           </div>
           <label class="row"><input id="lockRatioInput" type="checkbox" /> Lock width/height ratio</label>
 
-          <label>Margins (top / bottom / inner / outer)</label>
+          <label>Page layout
+            <select id="orientationSelect">
+              <option value="horizontal">Horizontal (left / right pages)</option>
+              <option value="vertical">Vertical (top / bottom pages)</option>
+            </select>
+          </label>
+
+          <label id="marginsLabel">Margins (top / bottom / inner / outer)</label>
           <div class="grid2">
             <input id="marginTopInput" type="number" min="0" title="Top" autocomplete="off" />
             <input id="marginBottomInput" type="number" min="0" title="Bottom" autocomplete="off" />

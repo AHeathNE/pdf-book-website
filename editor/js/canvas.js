@@ -25,9 +25,14 @@ function computeZoom() {
   const { widthPx, heightPx } = state.book.pageSize;
   const availW = viewport.clientWidth - 48;
   const availH = viewport.clientHeight - 48;
-  // Always fit against the worst-case (two-page) spread width so a page
-  // renders at the same visual size whether it's shown alone (a cover) or
-  // paired — matching how the exported viewer scales itself.
+  // Always fit against the worst-case (two-page) spread so a page renders
+  // at the same visual size whether it's shown alone (a cover) or paired
+  // — matching how the exported viewer scales itself. Which dimension
+  // doubles depends on which way pages pair: side by side (horizontal)
+  // doubles the width; stacked (vertical) doubles the height instead.
+  if (state.book.orientation === 'vertical') {
+    return Math.max(0.05, Math.min(availW / widthPx, availH / (heightPx * 2), 1.5));
+  }
   const totalW = widthPx * 2;
   return Math.max(0.05, Math.min(availW / totalW, availH / heightPx, 1.5));
 }
@@ -71,11 +76,25 @@ export function initZoomControls() {
   syncZoomControls();
 }
 
+// A standalone cover/back page has no facing page, so both sides use the
+// outer margin rather than mirroring inner/outer across the spine.
+// Whichever axis pages actually face each other across (left/right for a
+// normal book, top/bottom for a vertical one) is the one inner/outer
+// applies to — the book's margins.top/bottom fields do double duty as the
+// fixed left/right margins in vertical mode, since that axis never
+// mirrors between facing pages either way.
 function marginBoxFor(book, side) {
   const { widthPx, heightPx } = book.pageSize;
   const { top, bottom, inner, outer } = book.margins;
-  // A standalone cover/back page has no facing page, so both sides use
-  // the outer margin rather than mirroring inner/outer across the spine.
+  if (book.orientation === 'vertical') {
+    const marginTop = side === 'bottom' ? inner : outer;
+    const marginBottom = side === 'top' ? inner : outer;
+    const left = top;
+    const right = bottom;
+    return {
+      left, top: marginTop, right: widthPx - right, bottom: heightPx - marginBottom, width: widthPx - left - right, height: heightPx - marginTop - marginBottom,
+    };
+  }
   const left = side === 'right' ? inner : outer;
   const right = side === 'left' ? inner : outer;
   return { left, top, right: widthPx - right, bottom: heightPx - bottom, width: widthPx - left - right, height: heightPx - top - bottom };
@@ -248,9 +267,10 @@ function getCurrentSpreadEntries() {
   const spread = spreads[state.spreadIndex] || [];
   if (spread.length < 2) return [];
   const innerEls = document.querySelectorAll('#spread .pbw-page-inner');
+  const [sideA, sideB] = state.book.orientation === 'vertical' ? ['top', 'bottom'] : ['left', 'right'];
   return [
-    { page: spread[0], side: 'left', inner: innerEls[0], rect: innerEls[0] ? innerEls[0].getBoundingClientRect() : null },
-    { page: spread[1], side: 'right', inner: innerEls[1], rect: innerEls[1] ? innerEls[1].getBoundingClientRect() : null },
+    { page: spread[0], side: sideA, inner: innerEls[0], rect: innerEls[0] ? innerEls[0].getBoundingClientRect() : null },
+    { page: spread[1], side: sideB, inner: innerEls[1], rect: innerEls[1] ? innerEls[1].getBoundingClientRect() : null },
   ];
 }
 
@@ -276,21 +296,38 @@ function startObjectDrag(pageData, objectId, side, evt) {
     if (!moved) return;
 
     let nx = startBox.x + dx;
-    const ny = startBox.y + dy;
+    let ny = startBox.y + dy;
 
     // Dragging past the shared edge between two facing pages moves the
     // object onto the adjacent page, re-based to that page's coordinates.
+    // Which screen axis that edge runs along depends on how pages face
+    // each other: side by side (horizontal) share a vertical edge, so
+    // crossing it is an X-axis check; stacked (vertical) share a
+    // horizontal edge, so it's a Y-axis check instead.
+    const vertical = state.book.orientation === 'vertical';
     const entries = getCurrentSpreadEntries();
     const mine = entries.find((en) => en.page && en.page.id === currentPage.id);
     const other = entries.find((en) => en.page && en.page.id !== currentPage.id);
     if (mine && mine.rect && other && other.rect && other.page) {
-      const centerScreenX = mine.rect.left + (nx + obj.w / 2) * zoom;
-      const overOther = centerScreenX >= other.rect.left && centerScreenX <= other.rect.right;
+      const overOther = vertical
+        ? (() => {
+          const centerScreenY = mine.rect.top + (ny + obj.h / 2) * zoom;
+          return centerScreenY >= other.rect.top && centerScreenY <= other.rect.bottom;
+        })()
+        : (() => {
+          const centerScreenX = mine.rect.left + (nx + obj.w / 2) * zoom;
+          return centerScreenX >= other.rect.left && centerScreenX <= other.rect.right;
+        })();
       if (overOther) {
-        const screenX = mine.rect.left + nx * zoom;
         const idx = currentPage.objects.findIndex((o) => o.id === obj.id);
         if (idx >= 0) currentPage.objects.splice(idx, 1);
-        nx = (screenX - other.rect.left) / zoom;
+        if (vertical) {
+          const screenY = mine.rect.top + ny * zoom;
+          ny = (screenY - other.rect.top) / zoom;
+        } else {
+          const screenX = mine.rect.left + nx * zoom;
+          nx = (screenX - other.rect.left) / zoom;
+        }
         other.page.objects.push(obj);
         currentPage = other.page;
         currentSide = other.side;
@@ -388,6 +425,8 @@ export function renderCanvas() {
   zoom = computeZoom() * userZoom;
 
   const book = state.book;
+  const vertical = book.orientation === 'vertical';
+  container.classList.toggle('spread--vertical', vertical);
   applyStageBackground(document.getElementById('spreadViewport'), book.background);
   const spreads = getSpreads();
   if (state.spreadIndex >= spreads.length) state.spreadIndex = Math.max(0, spreads.length - 1);
@@ -396,8 +435,9 @@ export function renderCanvas() {
   if (spread.length === 1) {
     container.appendChild(buildPageSide(spread[0], 'single', book));
   } else {
-    container.appendChild(buildPageSide(spread[0] || null, 'left', book));
-    container.appendChild(buildPageSide(spread[1] || null, 'right', book));
+    const [sideA, sideB] = vertical ? ['top', 'bottom'] : ['left', 'right'];
+    container.appendChild(buildPageSide(spread[0] || null, sideA, book));
+    container.appendChild(buildPageSide(spread[1] || null, sideB, book));
   }
 }
 

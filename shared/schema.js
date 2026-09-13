@@ -15,6 +15,13 @@ export function newBook(overrides = {}) {
     title: 'Untitled Book',
     pageSize: { widthPx: 800, heightPx: 1100, dpi: 150 },
     background: { type: 'color', value: '#2b2b2b', fit: 'cover' },
+    // 'horizontal': pages pair left/right (a normal book). 'vertical':
+    // pages pair top/bottom instead — margins.top/bottom double as the
+    // left/right margins in that mode (see canvas.js's marginBoxFor),
+    // since whichever axis pages face each other across is the one
+    // margins.inner/outer apply to, and the other axis's margins just
+    // don't need separate fields of their own.
+    orientation: 'horizontal',
     margins: { top: 60, bottom: 60, inner: 70, outer: 50 },
     grid: { columns: 6, rows: 8, color: '#66b3ff', show: true, snap: true, origin: 'page' },
     covers: { front: true, back: true },
@@ -100,6 +107,7 @@ export function normalizeBook(raw) {
   const book = {
     ...defaults,
     ...raw,
+    orientation: raw.orientation === 'vertical' ? 'vertical' : 'horizontal',
     pageSize: { ...defaults.pageSize, ...(raw.pageSize || {}) },
     background: { ...defaults.background, ...(raw.background || {}) },
     margins: { ...defaults.margins, ...(raw.margins || {}) },

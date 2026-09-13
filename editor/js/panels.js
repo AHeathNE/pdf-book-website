@@ -280,6 +280,10 @@ function initBookSetup() {
   });
   document.getElementById('lockRatioInput').addEventListener('change', (e) => { lockRatio = e.target.checked; });
 
+  document.getElementById('orientationSelect').addEventListener('change', (e) => {
+    commit((book) => { book.orientation = e.target.value; });
+  });
+
   document.getElementById('pageSizePresetInput').addEventListener('change', (e) => {
     const preset = PAGE_SIZE_PRESETS.find((p) => p.id === e.target.value);
     if (!preset) return; // 'custom' — leave the current size as-is
@@ -362,6 +366,14 @@ function syncBookSetupInputs() {
 
   document.getElementById('lockRatioInput').checked = lockRatio;
   document.getElementById('sameMarginsInput').checked = sameMargins;
+
+  document.getElementById('orientationSelect').value = b.orientation;
+  const vertical = b.orientation === 'vertical';
+  document.getElementById('marginsLabel').textContent = vertical
+    ? 'Margins (left / right / inner / outer)'
+    : 'Margins (top / bottom / inner / outer)';
+  document.getElementById('marginTopInput').title = vertical ? 'Left' : 'Top';
+  document.getElementById('marginBottomInput').title = vertical ? 'Right' : 'Bottom';
 
   const columnsInput = document.getElementById('gridColumnsInput');
   const rowsInput = document.getElementById('gridRowsInput');
