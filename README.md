@@ -4,6 +4,13 @@ A flipbook viewer and the no-build workstation that produces it. Everything
 here is plain HTML/CSS/JS — no npm install, no bundler — so you can edit any
 file directly and see the result.
 
+## Live demo
+
+- **[Landing page](https://aheathne.github.io/pdf-book-website/)**
+- **[Sample flipbook](https://aheathne.github.io/pdf-book-website/viewer/index.html)** — the published viewer
+- **[Workstation / editor](https://aheathne.github.io/pdf-book-website/editor/index.html)** — build your own book
+- **[Booklet size comparison](https://aheathne.github.io/pdf-book-website/examples/size-comparison.html)** — how the four page-size presets scale, horizontal and vertical
+
 ```
 shared/    data model + DOM renderer shared by both apps below
 viewer/    the flipbook itself — the thing you publish to GitHub Pages
