@@ -19,6 +19,7 @@ export const TEMPLATES = {
   'punk-8up': {
     id: 'punk-8up',
     name: '8-Panel Punk Zine (one sheet, one cut)',
+    description: 'Front sheet has 8 panels; cut a slit across the middle two columns after printing, then fold. Back is one full-sheet poster.',
     grid: { columns: 4, rows: 2 },
     orientation: 'landscape',
     panels: [
@@ -36,6 +37,35 @@ export const TEMPLATES = {
     cutLine: {
       y: 0.5, x1: 0.25, x2: 0.75,
     },
+    back: { poster: true },
+  },
+  // A different fold (no cutting at all) with covers on the outer
+  // columns instead of the middle, and Pages 5/6 in the middle instead
+  // of Pages 1/2 — per the user-supplied reference sketch:
+  //
+  //   Row 0 (top,    baked 180deg): Page 4 | Page 3 | Page 2 | Page 1
+  //   Row 1 (bottom, baked   0deg): Back Cover | Page 5 | Page 6 | Front Cover
+  //
+  // Unlike punk-8up, physical adjacency on the flat sheet does NOT trace
+  // the reading order in a simple zigzag here — that's expected, it's a
+  // genuinely different fold mechanism, not a variant of the cut-zine's.
+  'no-cut-8up': {
+    id: 'no-cut-8up',
+    name: '8-Panel No-Cut Zine (fold only)',
+    description: 'Front sheet has 8 panels; fold only, no cutting. Back is one full-sheet poster.',
+    grid: { columns: 4, rows: 2 },
+    orientation: 'landscape',
+    panels: [
+      { id: 'page-4', label: 'Page 4', row: 0, col: 0, rotate: 180 },
+      { id: 'page-3', label: 'Page 3', row: 0, col: 1, rotate: 180 },
+      { id: 'page-2', label: 'Page 2', row: 0, col: 2, rotate: 180 },
+      { id: 'page-1', label: 'Page 1', row: 0, col: 3, rotate: 180 },
+      { id: 'back-cover', label: 'Back Cover', row: 1, col: 0, rotate: 0 },
+      { id: 'page-5', label: 'Page 5', row: 1, col: 1, rotate: 0 },
+      { id: 'page-6', label: 'Page 6', row: 1, col: 2, rotate: 0 },
+      { id: 'front-cover', label: 'Front Cover', row: 1, col: 3, rotate: 0 },
+    ],
+    cutLine: null,
     back: { poster: true },
   },
 };

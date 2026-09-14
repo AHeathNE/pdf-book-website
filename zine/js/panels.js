@@ -1,6 +1,6 @@
 import { newTextObject, newImageObject } from '../../shared/schema.js';
-import { pageSizeForPreset } from './schema.js';
-import { getTemplate } from './templates.js';
+import { pageSizeForPreset, ensurePanelsForTemplate } from './schema.js';
+import { TEMPLATES, getTemplate } from './templates.js';
 import {
   state, commit, checkpoint, selectObject, registerAsset, setSide, getActivePanelData, getPanelObjects,
 } from './store.js';
@@ -34,6 +34,30 @@ let lockRatio = false;
 
 function initTitle() {
   bindLiveField(document.getElementById('zineTitleInput'), 'input', (v) => { state.project.title = v; });
+}
+
+// ---- Template ----
+
+function initTemplateControls() {
+  const select = document.getElementById('templateSelect');
+  for (const template of Object.values(TEMPLATES)) {
+    const opt = document.createElement('option');
+    opt.value = template.id;
+    opt.textContent = template.name;
+    select.appendChild(opt);
+  }
+  select.addEventListener('change', (e) => {
+    commit((project) => {
+      project.templateId = e.target.value;
+      ensurePanelsForTemplate(project);
+    });
+    // The previously active panel might not exist on the new template
+    // (both current templates share the same panel ids, so this is a
+    // no-op today, but keeps a future template with different ids safe).
+    if (state.side === 'front' && !state.project.front[state.activePanelId]) {
+      state.activePanelId = Object.keys(state.project.front)[0] || null;
+    }
+  });
 }
 
 // ---- Sheet setup (paper size, margin) ----
@@ -82,7 +106,8 @@ function syncSheetSetupInputs() {
   if (document.activeElement !== marginInput) marginInput.value = formatForUnit(project[marginKey()], unit, dpi);
 
   const template = getTemplate(project.templateId);
-  document.getElementById('templateName').textContent = template.name;
+  document.getElementById('templateSelect').value = project.templateId;
+  document.getElementById('templateDescription').textContent = template.description;
 }
 
 // ---- Front/back + panel list ----
@@ -354,6 +379,7 @@ export function deleteSelectedObject() {
 
 export function initPanels() {
   initTitle();
+  initTemplateControls();
   initSheetSetup();
   initSideControls();
   initPalette();

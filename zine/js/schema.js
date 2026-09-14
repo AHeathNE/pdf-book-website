@@ -29,7 +29,6 @@ export function pageSizeForPreset(presetId, dpi = DEFAULT_DPI) {
 
 export function newZineProject(overrides = {}) {
   const templateId = overrides.templateId || 'punk-8up';
-  const template = getTemplate(templateId);
   const paperPreset = overrides.paperPreset || 'letter';
   const project = {
     version: SCHEMA_VERSION,
@@ -50,15 +49,25 @@ export function newZineProject(overrides = {}) {
     back: { objects: [] },
     ...overrides,
   };
-  project.front = {};
-  for (const panel of template.panels) {
-    project.front[panel.id] = { objects: [] };
-  }
+  ensurePanelsForTemplate(project);
   return project;
 }
 
 export function cloneProject(project) {
   return JSON.parse(JSON.stringify(project));
+}
+
+// Adds an empty { objects: [] } bag for any panel the project's current
+// template has that it doesn't already have — used when switching
+// templates live (see panels.js) so existing content is kept (templates
+// that share panel ids, like the two 8-panel ones, keep it exactly where
+// it was) while any newly-introduced panel starts blank.
+export function ensurePanelsForTemplate(project) {
+  const template = getTemplate(project.templateId);
+  if (!project.front) project.front = {};
+  for (const panel of template.panels) {
+    if (!project.front[panel.id]) project.front[panel.id] = { objects: [] };
+  }
 }
 
 function normalizeObject(raw) {

@@ -136,5 +136,6 @@ export async function exportPdf() {
 
   const name = (project.title || 'zine').replace(/[^a-zA-Z0-9_.-]/g, '_');
   doc.save(`${name}.pdf`);
-  setStatus('PDF exported — page 1 is the front sheet (print, then fold + cut), page 2 is the back poster.');
+  const foldStep = template.cutLine ? 'fold + cut' : 'fold';
+  setStatus(`PDF exported — page 1 is the front sheet (print, then ${foldStep}), page 2 is the back poster.`);
 }

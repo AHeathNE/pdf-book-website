@@ -9,7 +9,7 @@ file directly and see the result.
 - **[Landing page](https://aheathne.github.io/pdf-book-website/)**
 - **[Sample flipbook](https://aheathne.github.io/pdf-book-website/viewer/index.html)** — the published viewer
 - **[Workstation / editor](https://aheathne.github.io/pdf-book-website/editor/index.html)** — build your own book
-- **[Zine Design](https://aheathne.github.io/pdf-book-website/zine/index.html)** — lay out a one-sheet, fold-and-cut punk zine and export to print-ready PDF
+- **[Zine Design](https://aheathne.github.io/pdf-book-website/zine/index.html)** — lay out a one-sheet, 8-panel zine (cut-and-fold or fold-only) and export to print-ready PDF
 - **[Booklet size comparison](https://aheathne.github.io/pdf-book-website/examples/size-comparison.html)** — how the four page-size presets scale, horizontal and vertical
 
 ```
@@ -183,31 +183,41 @@ single-sheet zine and exporting it straight to a print-ready PDF — no
 website/standalone-HTML export here, since the deliverable is print, not
 a published site.
 
-- **Template**: starts with the classic one-sheet, one-cut "punk zine" —
-  print one sheet, fold it into 8 sections, cut a slit in the middle, and
-  fold again into a little 8-page book. The **front** sheet shows all 8
-  panels at once (Front Cover, Pages 1–6, Back Cover), laid out exactly
-  like the real fold: the top row is Pages 4–1 and the bottom row is
-  Pages 5–6 plus the two covers, with a dashed cut-line guide across the
-  middle two columns. The **back** is a single full-sheet poster — switch
-  between them with the Front/Back buttons in the left panel.
-- **Upside-down panels & the spin controls**: because of how the sheet
-  folds, the top row prints upside-down relative to the bottom row — that's
-  normal, not a bug. Use **Flip 180°** (top toolbar, above the canvas) to
-  spin your on-screen view 180° so you can comfortably read/type into
-  whichever row is currently upside-down; **Rotate 90°** is there too if
-  you want a different working angle. This only spins what you see while
-  editing — it never changes the project data and has no effect on the
-  exported PDF, which always renders the true, unspun sheet.
+- **Templates** (picker at the top of the left panel): every template is
+  an 8-panel front sheet (Front Cover, Pages 1–6, Back Cover) plus a
+  single full-sheet poster on the **back** — switch between front/back
+  with the buttons below the template picker.
+  - **8-Panel Punk Zine (one sheet, one cut)**: print one sheet, fold it
+    into 8 sections, cut a slit across the middle two columns, and fold
+    again into a little 8-page book. Top row (left to right) is Pages
+    4–1, bottom row is Pages 5–6 plus the two covers, with a dashed
+    cut-line guide shown across the middle two columns.
+  - **8-Panel No-Cut Zine (fold only)**: the same 8 panels and top-row
+    rotation, no cutting — fold only. Covers sit on the outer columns
+    instead of the middle: top row is Pages 4–1, bottom row is Back
+    Cover, Page 5, Page 6, Front Cover.
+  - Switching templates keeps whatever you've already written in each
+    panel (Page 3's text stays Page 3's text) since both templates share
+    the same panel names — only the layout/rotation changes.
+- **Upside-down panels & the spin controls**: on both templates, the top
+  row prints upside-down relative to the bottom row — that's normal, not
+  a bug. Use **Flip 180°** (top toolbar, above the canvas) to spin your
+  on-screen view 180° so you can comfortably read/type into whichever row
+  is currently upside-down; **Rotate 90°** is there too if you want a
+  different working angle. This only spins what you see while editing —
+  it never changes the project data and has no effect on the exported
+  PDF, which always renders the true, unspun sheet.
 - **Paper size**: Letter or A4, landscape.
 - **Adding content**: `+ Text` / `+ Image` add to whichever panel you last
   clicked into (or the poster, on the back). Drag/resize/snap work like
-  the book editor's canvas, including a safe-margin guide per panel; you
-  can drag an object into a neighboring panel in the same row.
+  the book editor's canvas, including a safe-margin guide per panel
+  (tracked separately for the front panels vs. the much bigger back
+  poster); you can drag an object into a neighboring panel in the same
+  row.
 - **Export PDF**: a single 2-page PDF sized to the real sheet — page 1 is
-  the front (fold-and-cut) sheet, page 2 is the back poster — meant for
-  double-sided printing (or printing both pages and pasting/taping them
-  back-to-back).
+  the front sheet (print, then fold, plus a cut on templates that need
+  one), page 2 is the back poster — meant for double-sided printing (or
+  printing both pages and pasting/taping them back-to-back).
 - **Autosave**: like the workstation, your work is saved to the browser's
   IndexedDB as you go. There's no Save/Open Project file yet — this tool
   is scoped to "design, then export to PDF."
