@@ -38,6 +38,15 @@ function initTitle() {
 
 // ---- Sheet setup (paper size, margin) ----
 
+// Front panels and the back poster are wildly different physical sizes,
+// so the safe-margin guide is tracked independently per side (see
+// schema.js) — otherwise a margin sized for the big poster can exceed
+// half a small panel's width/height, clamping its guide to 0 for a whole
+// range of edits and looking "stuck" once you switch sides.
+function marginKey() {
+  return state.side === 'back' ? 'backMargin' : 'frontMargin';
+}
+
 function initSheetSetup() {
   document.getElementById('paperPresetSelect').addEventListener('change', (e) => {
     commit((project) => {
@@ -54,7 +63,7 @@ function initSheetSetup() {
 
   bindLiveField(document.getElementById('marginInput'), 'input', (v) => {
     const dpi = state.project.pageSize.dpi;
-    state.project.margin = Math.max(0, unitToPx(Number(v) || 0, unit, dpi));
+    state.project[marginKey()] = Math.max(0, unitToPx(Number(v) || 0, unit, dpi));
   });
 }
 
@@ -67,9 +76,10 @@ function syncSheetSetupInputs() {
   const unitSelect = document.getElementById('unitSelect');
   if (document.activeElement !== unitSelect) unitSelect.value = unit;
 
+  document.getElementById('marginLabelText').textContent = `Safe-margin guide (${state.side === 'back' ? 'back' : 'front'})`;
   const marginInput = document.getElementById('marginInput');
   marginInput.step = unitStep(unit);
-  if (document.activeElement !== marginInput) marginInput.value = formatForUnit(project.margin, unit, dpi);
+  if (document.activeElement !== marginInput) marginInput.value = formatForUnit(project[marginKey()], unit, dpi);
 
   const template = getTemplate(project.templateId);
   document.getElementById('templateName').textContent = template.name;

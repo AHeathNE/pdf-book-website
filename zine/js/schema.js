@@ -36,9 +36,15 @@ export function newZineProject(overrides = {}) {
     title: 'Untitled Zine',
     templateId,
     paperPreset,
-    // Uniform safe-margin guide (native px) shown per panel — a pure
-    // editing aid for snapping/visual guidance, not enforced or printed.
-    margin: 18,
+    // Safe-margin guide (native px) — a pure editing aid for snapping/
+    // visual guidance, not enforced or printed. Front and back keep
+    // independent values because they're wildly different physical
+    // sizes (one ~2.75x4.25in panel vs. the full ~11x8.5in poster) — a
+    // margin sized for one can easily exceed half the other's width/
+    // height, which clamps the guide to 0 and makes it look "stuck"
+    // when you switch sides and try to adjust it there.
+    frontMargin: 18,
+    backMargin: 18,
     pageSize: pageSizeForPreset(paperPreset),
     front: {},
     back: { objects: [] },
@@ -73,7 +79,12 @@ export function normalizeProject(raw) {
     ...raw,
     templateId,
     pageSize: { ...defaults.pageSize, ...(raw.pageSize || {}) },
-    margin: typeof raw.margin === 'number' ? raw.margin : defaults.margin,
+    // raw.margin is the old single shared field (see the migration note
+    // above) — fall back to it for both sides on an older saved project.
+    frontMargin: typeof raw.frontMargin === 'number' ? raw.frontMargin
+      : (typeof raw.margin === 'number' ? raw.margin : defaults.frontMargin),
+    backMargin: typeof raw.backMargin === 'number' ? raw.backMargin
+      : (typeof raw.margin === 'number' ? raw.margin : defaults.backMargin),
     front: {},
     back: {
       objects: Array.isArray(raw.back && raw.back.objects) ? raw.back.objects.map(normalizeObject) : [],

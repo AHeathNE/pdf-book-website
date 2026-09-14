@@ -80,6 +80,14 @@ function snapCandidatesFor(size, margin) {
   return [0, size, size / 2, margin, size - margin];
 }
 
+// Front panels and the back poster are wildly different physical sizes,
+// so they keep independent margin values (see schema.js) — otherwise a
+// margin sized for the big poster can exceed half a small panel's width/
+// height, clamping its guide to 0 for a whole range of edits.
+function marginFor(panelDef) {
+  return panelDef.id === 'back' ? state.project.backMargin : state.project.frontMargin;
+}
+
 // A 180deg-rotated panel mirrors both axes, so an object's LOCAL
 // (authoring) x doesn't match where it visually sits on screen. These
 // convert between the two — used so drag/resize math can work in local
@@ -191,8 +199,8 @@ function startObjectDrag(panelDef, panelData, objectId, panelW, panelH, evt) {
       }
     }
 
-    obj.x = snapPoint(nx, snapCandidatesFor(panelW, state.project.margin));
-    obj.y = snapPoint(ny, snapCandidatesFor(panelH, state.project.margin));
+    obj.x = snapPoint(nx, snapCandidatesFor(panelW, marginFor(currentPanelDef)));
+    obj.y = snapPoint(ny, snapCandidatesFor(panelH, marginFor(currentPanelDef)));
     commit(() => {}, { history: false });
   }
   function onUp() {
@@ -221,8 +229,8 @@ function startObjectResize(panelDef, panelData, objectId, panelW, panelH, corner
     const rawDy = (e.clientY - startMouse.y) / zoom;
     const dx = rotated ? -rawDx : rawDx;
     const dy = rotated ? -rawDy : rawDy;
-    const xCandidates = snapCandidatesFor(panelW, state.project.margin);
-    const yCandidates = snapCandidatesFor(panelH, state.project.margin);
+    const xCandidates = snapCandidatesFor(panelW, marginFor(panelDef));
+    const yCandidates = snapCandidatesFor(panelH, marginFor(panelDef));
     const lock = obj.lockRatio || e.shiftKey;
 
     let {
@@ -311,7 +319,7 @@ function buildPanel(panelDef, panelData, panelW, panelH) {
     onSelect: (objectId, evt) => startObjectDrag(panelDef, panelData, objectId, panelW, panelH, evt),
   });
 
-  drawPanelMarginGuide(inner, panelW, panelH, state.project.margin);
+  drawPanelMarginGuide(inner, panelW, panelH, marginFor(panelDef));
 
   if (state.selection && state.selection.panelId === panelDef.id) {
     const obj = panelData.objects.find((o) => o.id === state.selection.objectId);
@@ -363,7 +371,7 @@ function buildBackPanel(backData, widthPx, heightPx) {
     onSelect: (objectId, evt) => startObjectDrag(panelDef, backData, objectId, widthPx, heightPx, evt),
   });
 
-  drawPanelMarginGuide(inner, widthPx, heightPx, state.project.margin);
+  drawPanelMarginGuide(inner, widthPx, heightPx, marginFor(panelDef));
 
   if (state.selection && state.selection.panelId === 'back') {
     const obj = backData.objects.find((o) => o.id === state.selection.objectId);
