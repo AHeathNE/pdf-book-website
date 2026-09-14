@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PDF Book Website — Zine Design</title>
+<link rel="stylesheet" href="zine.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="toolbar">
+      <div class="toolbar-group">
+        <span id="brand">Zine Design</span>
+        <input id="zineTitleInput" type="text" value="Untitled Zine" title="Zine title" />
+      </div>
+      <div class="toolbar-group">
+        <button id="newProjectBtn">New</button>
+      </div>
+      <div class="toolbar-group">
+        <button id="undoBtn" title="Undo (Ctrl+Z)">&#8630;</button>
+        <button id="redoBtn" title="Redo (Ctrl+Shift+Z)">&#8631;</button>
+      </div>
+      <div class="toolbar-group">
+        <button id="exportPdfBtn" class="primary">Export PDF</button>
+      </div>
+    </header>
+
+    <div id="body">
+      <aside id="leftPanel">
+        <section class="panel-section">
+          <h3>Template</h3>
+          <p id="templateName" class="hint"></p>
+          <p class="hint">Front sheet has 8 panels, cut and folded after printing. Back is one full-sheet poster.</p>
+        </section>
+        <section class="panel-section">
+          <h3>Sheet Setup</h3>
+          <label>Paper size
+            <select id="paperPresetSelect">
+              <option value="letter">11 x 8.5 (Letter, landscape)</option>
+              <option value="a4">11.69 x 8.27 (A4, landscape)</option>
+            </select>
+          </label>
+          <label>Safe-margin guide
+            <div class="row">
+              <input id="marginInput" type="number" min="0" step="0.05" autocomplete="off" />
+              <select id="unitSelect">
+                <option value="in">inches</option>
+                <option value="cm">cm</option>
+                <option value="px">px</option>
+              </select>
+            </div>
+          </label>
+        </section>
+        <section class="panel-section">
+          <h3>Side</h3>
+          <div class="side-toggle">
+            <button id="sideFrontBtn" class="side-btn">Front (8 panels)</button>
+            <button id="sideBackBtn" class="side-btn">Back (poster)</button>
+          </div>
+          <div id="panelList"></div>
+        </section>
+      </aside>
+
+      <main id="canvasArea">
+        <div id="palette">
+          <button data-add="text">+ Text</button>
+          <button data-add="image">+ Image</button>
+          <input id="imageFileInput" type="file" accept="image/*" hidden />
+          <div class="spacer"></div>
+          <div id="spinControls" title="View only — spins your screen view for comfortable editing. Never affects the printed PDF.">
+            <button id="rotate90Btn">Rotate 90&deg;</button>
+            <button id="flip180Btn">Flip 180&deg;</button>
+            <button id="resetSpinBtn" title="Reset view rotation">Reset</button>
+          </div>
+        </div>
+        <div id="sheetViewport">
+          <div id="sheetSpin">
+            <div id="sheet"></div>
+          </div>
+        </div>
+        <div id="zoomControls">
+          <button id="zoomOutBtn" title="Zoom out">&minus;</button>
+          <select id="zoomSelect" title="Zoom level">
+            <option value="0.25">25%</option>
+            <option value="0.5">50%</option>
+            <option value="0.75">75%</option>
+            <option value="1">100%</option>
+            <option value="1.25">125%</option>
+            <option value="1.5">150%</option>
+            <option value="2">200%</option>
+            <option value="3">300%</option>
+          </select>
+          <button id="zoomInBtn" title="Zoom in">+</button>
+          <button id="zoomFitBtn" title="Reset to fit">Fit</button>
+        </div>
+      </main>
+
+      <aside id="rightPanel">
+        <h3>Properties</h3>
+        <div id="propertiesPanel"><p class="hint">Select an object to edit it.</p></div>
+      </aside>
+    </div>
+
+    <footer id="statusBar">
+      <span id="statusText">Ready.</span>
+    </footer>
+  </div>
+
+  <script src="../editor/lib/jspdf.umd.min.js"></script>
+  <script src="../editor/lib/html2canvas.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

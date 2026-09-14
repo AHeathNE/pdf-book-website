@@ -9,12 +9,14 @@ file directly and see the result.
 - **[Landing page](https://aheathne.github.io/pdf-book-website/)**
 - **[Sample flipbook](https://aheathne.github.io/pdf-book-website/viewer/index.html)** — the published viewer
 - **[Workstation / editor](https://aheathne.github.io/pdf-book-website/editor/index.html)** — build your own book
+- **[Zine Design](https://aheathne.github.io/pdf-book-website/zine/index.html)** — lay out a one-sheet, fold-and-cut punk zine and export to print-ready PDF
 - **[Booklet size comparison](https://aheathne.github.io/pdf-book-website/examples/size-comparison.html)** — how the four page-size presets scale, horizontal and vertical
 
 ```
-shared/    data model + DOM renderer shared by both apps below
+shared/    data model + DOM renderer shared by editor/ and viewer/
 viewer/    the flipbook itself — the thing you publish to GitHub Pages
 editor/    the workstation: a browser-based layout tool that builds the book
+zine/      a separate offshoot: single-sheet zine layout, export to PDF only
 desktop/   optional Electron wrapper — see "Desktop app" below
 ```
 
@@ -173,6 +175,45 @@ hasn't been tried yet.
   this way runs about a third larger than the same files would be on
   their own — a good fit for text/photo booklets, less so for anything
   image-heavy (use Export Website for those instead).
+
+## Zine Design (`zine/`)
+
+A separate, simpler offshoot of the workstation for laying out a
+single-sheet zine and exporting it straight to a print-ready PDF — no
+website/standalone-HTML export here, since the deliverable is print, not
+a published site.
+
+- **Template**: starts with the classic one-sheet, one-cut "punk zine" —
+  print one sheet, fold it into 8 sections, cut a slit in the middle, and
+  fold again into a little 8-page book. The **front** sheet shows all 8
+  panels at once (Front Cover, Pages 1–6, Back Cover), laid out exactly
+  like the real fold: the top row is Pages 4–1 and the bottom row is
+  Pages 5–6 plus the two covers, with a dashed cut-line guide across the
+  middle two columns. The **back** is a single full-sheet poster — switch
+  between them with the Front/Back buttons in the left panel.
+- **Upside-down panels & the spin controls**: because of how the sheet
+  folds, the top row prints upside-down relative to the bottom row — that's
+  normal, not a bug. Use **Flip 180°** (top toolbar, above the canvas) to
+  spin your on-screen view 180° so you can comfortably read/type into
+  whichever row is currently upside-down; **Rotate 90°** is there too if
+  you want a different working angle. This only spins what you see while
+  editing — it never changes the project data and has no effect on the
+  exported PDF, which always renders the true, unspun sheet.
+- **Paper size**: Letter or A4, landscape.
+- **Adding content**: `+ Text` / `+ Image` add to whichever panel you last
+  clicked into (or the poster, on the back). Drag/resize/snap work like
+  the book editor's canvas, including a safe-margin guide per panel; you
+  can drag an object into a neighboring panel in the same row.
+- **Export PDF**: a single 2-page PDF sized to the real sheet — page 1 is
+  the front (fold-and-cut) sheet, page 2 is the back poster — meant for
+  double-sided printing (or printing both pages and pasting/taping them
+  back-to-back).
+- **Autosave**: like the workstation, your work is saved to the browser's
+  IndexedDB as you go. There's no Save/Open Project file yet — this tool
+  is scoped to "design, then export to PDF."
+- More templates and paper sizes can be added later — the template shape
+  (panel grid, per-panel rotation, cut-line geometry) lives in one file,
+  `zine/js/templates.js`.
 
 ## Publishing a book to GitHub Pages
 

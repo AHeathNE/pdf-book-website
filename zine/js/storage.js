@@ -1,0 +1,71 @@
+import { cloneProject } from './schema.js';
+import { state, loadProject, registerAsset } from './store.js';
+
+const DB_NAME = 'zine-editor';
+const STORE_NAME = 'project';
+const KEY = 'current';
+
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE_NAME);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function idbSet(record) {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(record, KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+
+async function idbGet() {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(KEY);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+let saveTimer = null;
+export function autosaveDebounced() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { saveToIndexedDb().catch(console.error); }, 800);
+}
+
+async function saveToIndexedDb() {
+  const assets = [...state.assets.entries()].map(([url, info]) => ({ url, filename: info.filename, blob: info.blob }));
+  await idbSet({ project: cloneProject(state.project), assets });
+}
+
+function remapImages(projectJson, remap) {
+  for (const panel of Object.values(projectJson.front || {})) {
+    for (const obj of panel.objects || []) {
+      if (obj.type === 'image') obj.src = remap(obj.src);
+    }
+  }
+  for (const obj of (projectJson.back && projectJson.back.objects) || []) {
+    if (obj.type === 'image') obj.src = remap(obj.src);
+  }
+}
+
+export async function restoreFromIndexedDb() {
+  const record = await idbGet();
+  if (!record) return false;
+
+  const urlMap = new Map();
+  for (const { url, filename, blob } of record.assets) {
+    urlMap.set(url, registerAsset(blob, filename));
+  }
+  const projectJson = record.project;
+  remapImages(projectJson, (v) => (typeof v === 'string' && urlMap.has(v) ? urlMap.get(v) : v));
+  loadProject(projectJson);
+  return true;
+}
