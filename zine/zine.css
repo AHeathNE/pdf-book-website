@@ -260,6 +260,17 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
 #propertiesPanel .danger { background: #4a2323; border-color: #6b3030; margin-top: 10px; width: 100%; }
 #propertiesPanel .danger:hover { background: #5c2b2b; }
 
+/* "Show template guides" off: hides everything that's purely an editing
+   aid (panel divider outlines, page-number labels, the safe-margin box,
+   the cut-line) so you can preview the sheet as it'll actually print.
+   The active-panel accent outline stays — that's a selection indicator,
+   not a template guide. Nothing here ever reaches the exported PDF
+   either way; export-pdf.js never draws any of it. */
+.zine-guides-hidden .zine-panel:not(.zine-panel--active) { outline: none; }
+.zine-guides-hidden .zine-panel-label,
+.zine-guides-hidden .zine-overlay,
+.zine-guides-hidden .pbw-guide--margin { display: none; }
+
 #statusBar {
   flex: 0 0 auto;
   height: 26px;

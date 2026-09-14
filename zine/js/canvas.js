@@ -3,7 +3,9 @@ import {
   state, commit, checkpoint, selectObject,
 } from './store.js';
 import { getTemplate, getRowPanels } from './templates.js';
-import { getSpinDeg, onSpinChange } from './view.js';
+import {
+  getSpinDeg, onViewChange, getShowGuides,
+} from './view.js';
 
 const SNAP_THRESHOLD = 8; // native px
 
@@ -420,6 +422,7 @@ export function renderCanvas() {
   const { widthPx, heightPx } = state.project.pageSize;
   sheet.style.width = `${widthPx * zoom}px`;
   sheet.style.height = `${heightPx * zoom}px`;
+  sheet.classList.toggle('zine-guides-hidden', !getShowGuides());
 
   const template = getTemplate(state.project.templateId);
 
@@ -436,7 +439,7 @@ export function renderCanvas() {
   }
 }
 
-onSpinChange(() => renderCanvas());
+onViewChange(() => renderCanvas());
 
 window.addEventListener('resize', () => renderCanvas());
 
