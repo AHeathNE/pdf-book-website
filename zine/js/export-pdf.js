@@ -1,16 +1,20 @@
-// Exports a 2-page, print-ready PDF sized to the real sheet: page 1 is the
-// front (8 panels, each individually rasterized unrotated then composited
-// back onto the sheet at its template-baked rotation, so what prints is
-// the true, unspun sheet regardless of the on-screen view-spin), page 2 is
-// the back poster. Mirrors editor/js/export-pdf.js's html2canvas + jsPDF
-// approach, including its "rasterize unrotated, composite with native
-// Canvas2D rotate" trick for rotated content — applied per panel here
-// (and still per rotated object within a panel), since html2canvas itself
-// mishandles rotated elements (shears them; confirmed against a real
-// exported PDF), while the browser's own Canvas2D rotation is reliable.
+// Exports a 2-page, print-ready PDF sized to the real sheet: one page per
+// side. A poster side renders as one full-sheet canvas; a panel-grid side
+// renders each panel individually, unrotated, in its own (possibly
+// axis-swapped — see contentSize) authoring space, then composites each
+// onto the sheet at its template-baked rotation, so what prints is the
+// true, unspun sheet regardless of the on-screen view-spin. Mirrors
+// editor/js/export-pdf.js's html2canvas + jsPDF approach, including its
+// "rasterize unrotated, composite with native Canvas2D rotate" trick for
+// rotated content — applied per panel here (and still per rotated object
+// within a panel), since html2canvas itself mishandles rotated elements
+// (shears them; confirmed against a real exported PDF), while the
+// browser's own Canvas2D rotation is reliable.
 import { renderPage } from '../../shared/renderer.js';
 import { state } from './store.js';
-import { getTemplate } from './templates.js';
+import {
+  getTemplate, isPosterSide, getSideGrid, getSidePanels, getSideCutLine,
+} from './templates.js';
 
 function setStatus(text) {
   const el = document.getElementById('statusText');
@@ -37,14 +41,14 @@ async function renderRotatedObjectCanvas(obj) {
 }
 
 // Renders one panel's own objects (in its local, unrotated authoring
-// space) to a canvas sized exactly to that panel.
-async function renderPanelCanvas(panelData, panelW, panelH) {
+// space) to a canvas sized exactly to that panel's content box.
+async function renderPanelCanvas(panelData, contentW, contentH) {
   const offscreen = document.createElement('div');
   offscreen.style.position = 'fixed';
   offscreen.style.left = '-99999px';
   offscreen.style.top = '0';
-  offscreen.style.width = `${panelW}px`;
-  offscreen.style.height = `${panelH}px`;
+  offscreen.style.width = `${contentW}px`;
+  offscreen.style.height = `${contentH}px`;
   document.body.appendChild(offscreen);
 
   try {
@@ -53,15 +57,15 @@ async function renderPanelCanvas(panelData, panelW, panelH) {
 
     renderPage({ objects: baseObjects, background: null }, offscreen, { editable: false });
     const baseCanvas = await html2canvas(offscreen, {
-      width: panelW, height: panelH, scale: 1, useCORS: true, backgroundColor: '#ffffff',
+      width: contentW, height: contentH, scale: 1, useCORS: true, backgroundColor: '#ffffff',
     });
 
     const canvas = document.createElement('canvas');
-    canvas.width = panelW;
-    canvas.height = panelH;
+    canvas.width = contentW;
+    canvas.height = contentH;
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, panelW, panelH);
+    ctx.fillRect(0, 0, contentW, contentH);
     ctx.drawImage(baseCanvas, 0, 0);
 
     for (const obj of rotatedObjects) {
@@ -79,10 +83,18 @@ async function renderPanelCanvas(panelData, panelW, panelH) {
   }
 }
 
-async function buildFrontCanvas(project, template) {
+// A 90/270 panel's authoring space is swapped (contentW x contentH is
+// panelH x panelW) so that rotating it lands back on the panelW x panelH
+// cell — see canvas.js's identical contentSize/buildPanel.
+function contentSize(rotateDeg, panelW, panelH) {
+  return (rotateDeg % 180 !== 0) ? { w: panelH, h: panelW } : { w: panelW, h: panelH };
+}
+
+async function buildGridCanvas(project, template, side) {
   const { widthPx, heightPx } = project.pageSize;
-  const panelW = widthPx / template.grid.columns;
-  const panelH = heightPx / template.grid.rows;
+  const grid = getSideGrid(template, side);
+  const panelW = widthPx / grid.columns;
+  const panelH = heightPx / grid.rows;
 
   const sheetCanvas = document.createElement('canvas');
   sheetCanvas.width = widthPx;
@@ -91,25 +103,33 @@ async function buildFrontCanvas(project, template) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, widthPx, heightPx);
 
-  for (const panelDef of template.panels) {
-    const panelData = project.front[panelDef.id];
-    setStatus(`Exporting PDF — front, ${panelDef.label}…`);
+  for (const panelDef of getSidePanels(template, side)) {
+    const panelData = project[side][panelDef.id];
+    setStatus(`Exporting PDF — ${side}, ${panelDef.label}…`);
+    const { w: contentW, h: contentH } = contentSize(panelDef.rotate, panelW, panelH);
     // eslint-disable-next-line no-await-in-loop
-    const panelCanvas = await renderPanelCanvas(panelData, panelW, panelH);
+    const panelCanvas = await renderPanelCanvas(panelData, contentW, contentH);
     const cx = panelDef.col * panelW + panelW / 2;
     const cy = panelDef.row * panelH + panelH / 2;
     ctx.save();
     ctx.translate(cx, cy);
     if (panelDef.rotate) ctx.rotate((panelDef.rotate * Math.PI) / 180);
-    ctx.drawImage(panelCanvas, -panelW / 2, -panelH / 2, panelW, panelH);
+    ctx.drawImage(panelCanvas, -contentW / 2, -contentH / 2, contentW, contentH);
     ctx.restore();
   }
   return sheetCanvas;
 }
 
-async function buildBackCanvas(project) {
+async function buildPosterCanvas(project, side) {
   const { widthPx, heightPx } = project.pageSize;
-  return renderPanelCanvas(project.back, widthPx, heightPx);
+  setStatus(`Exporting PDF — ${side} sheet…`);
+  return renderPanelCanvas(project[side], widthPx, heightPx);
+}
+
+async function buildSideCanvas(project, template, side) {
+  return isPosterSide(template, side)
+    ? buildPosterCanvas(project, side)
+    : buildGridCanvas(project, template, side);
 }
 
 export async function exportPdf() {
@@ -124,18 +144,19 @@ export async function exportPdf() {
 
   const { jsPDF } = window.jspdf;
 
-  setStatus('Exporting PDF — front sheet…');
-  const frontCanvas = await buildFrontCanvas(project, template);
+  const frontCanvas = await buildSideCanvas(project, template, 'front');
   const doc = new jsPDF({ unit: 'pt', format: [wPt, hPt], orientation });
   doc.addImage(frontCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, wPt, hPt);
 
-  setStatus('Exporting PDF — back sheet…');
-  const backCanvas = await buildBackCanvas(project);
+  const backCanvas = await buildSideCanvas(project, template, 'back');
   doc.addPage([wPt, hPt], orientation);
   doc.addImage(backCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, wPt, hPt);
 
   const name = (project.title || 'zine').replace(/[^a-zA-Z0-9_.-]/g, '_');
   doc.save(`${name}.pdf`);
-  const foldStep = template.cutLine ? 'fold + cut' : 'fold';
-  setStatus(`PDF exported — page 1 is the front sheet (print, then ${foldStep}), page 2 is the back poster.`);
+  const anyCut = getSideCutLine(template, 'front') || getSideCutLine(template, 'back');
+  const backIsPoster = isPosterSide(template, 'back');
+  const foldStep = anyCut ? 'fold + cut' : 'fold';
+  const backDescription = backIsPoster ? 'back poster' : 'back sheet';
+  setStatus(`PDF exported — page 1 is the front sheet (print, then ${foldStep}), page 2 is the ${backDescription}.`);
 }

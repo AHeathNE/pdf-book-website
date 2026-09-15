@@ -1,14 +1,16 @@
 import { newZineProject, cloneProject, normalizeProject } from './schema.js';
+import { getTemplate, isPosterSide, getSidePanels } from './templates.js';
 
 const HISTORY_LIMIT = 60;
 
 export const state = {
   project: newZineProject(),
   side: 'front', // 'front' | 'back'
-  // Which panel new objects get added to. 'back' when state.side==='back',
-  // otherwise a front panel id (see zine/js/templates.js).
+  // Which panel new objects get added to, on a grid side; ignored on a
+  // poster side (objects there always go straight into that side's one
+  // { objects } bag — see getActivePanelData).
   activePanelId: 'front-cover',
-  selection: null, // { panelId, objectId }
+  selection: null, // { side, panelId, objectId }
   assets: new Map(), // blobUrl -> { filename, blob }
   undoStack: [],
   redoStack: [],
@@ -28,23 +30,36 @@ export function notify() {
   for (const fn of listeners) fn(state);
 }
 
+function firstPanelId(side) {
+  const template = getTemplate(state.project.templateId);
+  const panels = getSidePanels(template, side);
+  return panels.length ? panels[0].id : null;
+}
+
 export function setSide(side) {
+  const template = getTemplate(state.project.templateId);
   state.side = side === 'back' ? 'back' : 'front';
-  state.activePanelId = state.side === 'back' ? 'back' : (state.activePanelId === 'back' ? Object.keys(state.project.front)[0] : state.activePanelId);
-  selectObject(null, null);
+  if (isPosterSide(template, state.side)) {
+    state.activePanelId = state.side;
+  } else if (!state.project[state.side][state.activePanelId]) {
+    state.activePanelId = firstPanelId(state.side);
+  }
+  selectObject(null, null, null);
 }
 
 // Returns the { objects } bag new objects get added to — the currently
-// active panel on the front, or the poster on the back.
+// active panel on a grid side, or the single bag on a poster side.
 export function getActivePanelData() {
-  if (state.side === 'back') return state.project.back;
-  return state.project.front[state.activePanelId] || null;
+  const template = getTemplate(state.project.templateId);
+  if (isPosterSide(template, state.side)) return state.project[state.side];
+  return state.project[state.side][state.activePanelId] || null;
 }
 
 export function loadProject(rawProject, { resetHistory = true } = {}) {
   state.project = normalizeProject(rawProject);
   state.side = 'front';
-  state.activePanelId = Object.keys(state.project.front)[0] || null;
+  const template = getTemplate(state.project.templateId);
+  state.activePanelId = isPosterSide(template, 'front') ? 'front' : firstPanelId('front');
   state.selection = null;
   if (resetHistory) {
     state.undoStack = [];
@@ -79,23 +94,24 @@ export function redo() {
   notify();
 }
 
-// Returns the live objects array for a panel id ('back', or a front panel
-// id) directly from state.project — callers mutate it in place inside a
-// commit()/mutator.
-export function getPanelObjects(panelId) {
-  if (panelId === 'back') return state.project.back.objects;
-  const panel = state.project.front[panelId];
+// Returns the live objects array for a panel on the given side (or the
+// side's single bag, on a poster side) directly from state.project —
+// callers mutate it in place inside a commit()/mutator.
+export function getPanelObjects(side, panelId) {
+  const template = getTemplate(state.project.templateId);
+  if (isPosterSide(template, side)) return state.project[side].objects;
+  const panel = state.project[side][panelId];
   return panel ? panel.objects : null;
 }
 
-export function selectObject(panelId, objectId) {
-  state.selection = objectId ? { panelId, objectId } : null;
+export function selectObject(side, panelId, objectId) {
+  state.selection = objectId ? { side, panelId, objectId } : null;
   notify();
 }
 
 export function getSelectedObject() {
   if (!state.selection) return null;
-  const objs = getPanelObjects(state.selection.panelId);
+  const objs = getPanelObjects(state.selection.side, state.selection.panelId);
   return objs ? objs.find((o) => o.id === state.selection.objectId) || null : null;
 }
 

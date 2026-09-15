@@ -183,41 +183,56 @@ single-sheet zine and exporting it straight to a print-ready PDF — no
 website/standalone-HTML export here, since the deliverable is print, not
 a published site.
 
-- **Templates** (picker at the top of the left panel): every template is
-  an 8-panel front sheet (Front Cover, Pages 1–6, Back Cover) plus a
-  single full-sheet poster on the **back** — switch between front/back
-  with the buttons below the template picker.
-  - **8-Panel Punk Zine (one sheet, one cut)**: print one sheet, fold it
-    into 8 sections, cut a slit across the middle two columns, and fold
-    again into a little 8-page book. Top row (left to right) is Pages
-    4–1, bottom row is Pages 5–6 plus the two covers, with a dashed
-    cut-line guide shown across the middle two columns.
-  - **8-Panel No-Cut Zine (fold only)**: the same 8 panels and top-row
-    rotation, no cutting — fold only. Covers sit on the outer columns
-    instead of the middle: top row is Pages 4–1, bottom row is Back
-    Cover, Page 5, Page 6, Front Cover.
+- **Templates** (picker at the top of the left panel): each side (front
+  and back) of a template is either a single full-sheet poster or its own
+  8-panel cut/fold grid — switch between the two sides with the buttons
+  below the template picker, which label themselves accordingly (e.g.
+  "Front (8 panels)" vs. "Back (poster)").
+  - **8-Panel Punk Zine (one sheet, one cut)**: front has 8 panels (Front
+    Cover, Pages 1–6, Back Cover), back is a poster. Cut a slit across
+    the middle two columns after printing, then fold. Top row (left to
+    right) is Pages 4–1, bottom row is Pages 5–6 plus the two covers,
+    with a dashed cut-line guide shown across the middle two columns.
+  - **8-Panel No-Cut Zine (fold only)**: same 8 panels and top-row
+    rotation as the punk zine, back is a poster, but fold only — no
+    cutting. Covers sit on the outer columns instead of the middle: top
+    row is Pages 4–1, bottom row is Back Cover, Page 5, Page 6, Front
+    Cover.
+  - **16-Page Pants Zine (two-sided, one cut, read vertically)**: both
+    front *and* back are 8-panel cut/fold grids (16 pages total — Front
+    Cover, Pages 1–14, Back Cover), sharing one physical cut that spans
+    3/4 of the width instead of just the middle two columns. The
+    finished booklet is read in **portrait**, turned 90° from how the
+    flat landscape sheet prints, so panels bake a 90°/270° rotation
+    instead of the 0°/180° split the other two templates use — and,
+    unlike those two, the rotation can vary panel-by-panel within a row,
+    not just by whole row. Dragging an object into a neighboring panel
+    only works between two 0°/180° panels (the punk/no-cut templates);
+    on this template you place an object directly into the panel you
+    want.
   - Switching templates keeps whatever you've already written in each
-    panel (Page 3's text stays Page 3's text) since both templates share
-    the same panel names — only the layout/rotation changes.
-- **Upside-down panels & the spin controls**: on both templates, the top
-  row prints upside-down relative to the bottom row — that's normal, not
-  a bug. Use **Flip 180°** (top toolbar, above the canvas) to spin your
-  on-screen view 180° so you can comfortably read/type into whichever row
-  is currently upside-down; **Rotate 90°** is there too if you want a
-  different working angle. This only spins what you see while editing —
-  it never changes the project data and has no effect on the exported
+    panel (Page 3's text stays Page 3's text) since all three templates
+    use the same panel names on any side that's a matching 8-panel
+    grid — only the layout/rotation changes.
+- **Upside-down/sideways panels & the spin controls**: on every template,
+  some panels print rotated relative to others on the flat sheet — that's
+  normal, not a bug, it's a direct consequence of the fold. Use **Flip
+  180°** (top toolbar, above the canvas) to spin your on-screen view 180°
+  so you can comfortably read/type into whichever panel is currently
+  upside-down; **Rotate 90°** is there too, useful for the 16-page
+  template's sideways panels. This only spins what you see while
+  editing — it never changes the project data and has no effect on the exported
   PDF, which always renders the true, unspun sheet.
 - **Paper size**: Letter or A4, landscape.
 - **Adding content**: `+ Text` / `+ Image` add to whichever panel you last
-  clicked into (or the poster, on the back). Drag/resize/snap work like
-  the book editor's canvas, including a safe-margin guide per panel
-  (tracked separately for the front panels vs. the much bigger back
-  poster); you can drag an object into a neighboring panel in the same
-  row.
+  clicked into (or the poster's one bag, on a poster side). Drag/resize/
+  snap work like the book editor's canvas, including a safe-margin guide
+  tracked independently per side (front vs. back can be very different
+  physical sizes — a panel vs. a full poster, say).
 - **Export PDF**: a single 2-page PDF sized to the real sheet — page 1 is
-  the front sheet (print, then fold, plus a cut on templates that need
-  one), page 2 is the back poster — meant for double-sided printing (or
-  printing both pages and pasting/taping them back-to-back).
+  the front, page 2 is the back (print, then fold, plus a cut on
+  templates that need one) — meant for double-sided printing (or printing
+  both pages and pasting/taping them back-to-back).
 - **Autosave**: like the workstation, your work is saved to the browser's
   IndexedDB as you go. There's no Save/Open Project file yet — this tool
   is scoped to "design, then export to PDF."

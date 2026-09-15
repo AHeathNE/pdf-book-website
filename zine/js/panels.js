@@ -1,6 +1,8 @@
 import { newTextObject, newImageObject } from '../../shared/schema.js';
 import { pageSizeForPreset, ensurePanelsForTemplate } from './schema.js';
-import { TEMPLATES, getTemplate } from './templates.js';
+import {
+  TEMPLATES, getTemplate, isPosterSide, getSideGrid, getSidePanels,
+} from './templates.js';
 import {
   state, commit, checkpoint, selectObject, registerAsset, setSide, getActivePanelData, getPanelObjects,
 } from './store.js';
@@ -51,11 +53,16 @@ function initTemplateControls() {
       project.templateId = e.target.value;
       ensurePanelsForTemplate(project);
     });
-    // The previously active panel might not exist on the new template
-    // (both current templates share the same panel ids, so this is a
-    // no-op today, but keeps a future template with different ids safe).
-    if (state.side === 'front' && !state.project.front[state.activePanelId]) {
-      state.activePanelId = Object.keys(state.project.front)[0] || null;
+    // The previously active panel might not exist on the new template's
+    // current side (most templates share panel ids on the front, so this
+    // is usually a no-op) — fall back to that side's first panel, or to
+    // the side name itself if it's now a poster.
+    const template = getTemplate(state.project.templateId);
+    if (isPosterSide(template, state.side)) {
+      state.activePanelId = state.side;
+    } else if (!state.project[state.side][state.activePanelId]) {
+      const panels = getSidePanels(template, state.side);
+      state.activePanelId = panels.length ? panels[0].id : null;
     }
   });
 }
@@ -117,32 +124,45 @@ function initSideControls() {
   document.getElementById('sideBackBtn').addEventListener('click', () => setSide('back'));
 }
 
+function sideButtonLabel(template, side) {
+  const name = side === 'back' ? 'Back' : 'Front';
+  if (isPosterSide(template, side)) return `${name} (poster)`;
+  const { columns, rows } = getSideGrid(template, side);
+  return `${name} (${columns * rows} panels)`;
+}
+
 function renderSideControls() {
-  document.getElementById('sideFrontBtn').classList.toggle('active', state.side === 'front');
-  document.getElementById('sideBackBtn').classList.toggle('active', state.side === 'back');
+  const template = getTemplate(state.project.templateId);
+  const frontBtn = document.getElementById('sideFrontBtn');
+  const backBtn = document.getElementById('sideBackBtn');
+  frontBtn.textContent = sideButtonLabel(template, 'front');
+  backBtn.textContent = sideButtonLabel(template, 'back');
+  frontBtn.classList.toggle('active', state.side === 'front');
+  backBtn.classList.toggle('active', state.side === 'back');
 
   const list = document.getElementById('panelList');
   list.innerHTML = '';
-  if (state.side !== 'front') {
+  if (isPosterSide(template, state.side)) {
     list.hidden = true;
     return;
   }
   list.hidden = false;
-  const template = getTemplate(state.project.templateId);
-  const byRow = [0, 1].map((row) => template.panels.filter((p) => p.row === row).sort((a, b) => a.col - b.col));
-  for (const row of byRow) {
+  const panels = getSidePanels(template, state.side);
+  const rowNumbers = [...new Set(panels.map((p) => p.row))].sort((a, b) => a - b);
+  for (const row of rowNumbers) {
     const rowEl = document.createElement('div');
     rowEl.className = 'panel-list-row';
-    for (const panelDef of row) {
+    for (const panelDef of panels.filter((p) => p.row === row).sort((a, b) => a.col - b.col)) {
       const item = document.createElement('div');
       item.className = 'panel-list-item';
       if (panelDef.id === state.activePanelId) item.classList.add('active');
-      if (panelDef.rotate) item.classList.add('upside-down');
+      if (panelDef.rotate === 180) item.classList.add('upside-down');
+      else if (panelDef.rotate) item.style.transform = `rotate(${panelDef.rotate}deg)`;
       item.textContent = panelDef.label;
-      item.title = panelDef.rotate ? `${panelDef.label} — prints upside-down on this sheet (flip the view to edit it comfortably)` : panelDef.label;
+      item.title = panelDef.rotate ? `${panelDef.label} — prints rotated ${panelDef.rotate}° on this sheet (use the spin controls to edit it comfortably)` : panelDef.label;
       item.addEventListener('click', () => {
         state.activePanelId = panelDef.id;
-        selectObject(null, null);
+        selectObject(null, null, null);
       });
       rowEl.appendChild(item);
     }
@@ -156,7 +176,9 @@ function addObjectToActivePanel(obj) {
   const panel = getActivePanelData();
   if (!panel) return;
   commit(() => { panel.objects.push(obj); });
-  selectObject(state.side === 'back' ? 'back' : state.activePanelId, obj.id);
+  const template = getTemplate(state.project.templateId);
+  const panelId = isPosterSide(template, state.side) ? state.side : state.activePanelId;
+  selectObject(state.side, panelId, obj.id);
 }
 
 function scaledImageSize(img, maxW, maxH) {
@@ -166,9 +188,17 @@ function scaledImageSize(img, maxW, maxH) {
 
 function activePanelPixelSize() {
   const { widthPx, heightPx } = state.project.pageSize;
-  if (state.side === 'back') return { w: widthPx, h: heightPx };
   const template = getTemplate(state.project.templateId);
-  return { w: widthPx / template.grid.columns, h: heightPx / template.grid.rows };
+  if (isPosterSide(template, state.side)) return { w: widthPx, h: heightPx };
+  const grid = getSideGrid(template, state.side);
+  const panelW = widthPx / grid.columns;
+  const panelH = heightPx / grid.rows;
+  // A 90/270 panel's own authoring space is swapped (see canvas.js's
+  // contentSize) — match that here so a newly-added image is scaled
+  // against the panel's actual content box, not its unrotated cell.
+  const panelDef = getSidePanels(template, state.side).find((p) => p.id === state.activePanelId);
+  const swapped = panelDef && panelDef.rotate % 180 !== 0;
+  return swapped ? { w: panelH, h: panelW } : { w: panelW, h: panelH };
 }
 
 function initPalette() {
@@ -234,7 +264,7 @@ let lastRenderedObjId = null;
 
 function getSelectedPanelAndObject() {
   if (!state.selection) return {};
-  const objects = getPanelObjects(state.selection.panelId);
+  const objects = getPanelObjects(state.selection.side, state.selection.panelId);
   const obj = objects && objects.find((o) => o.id === state.selection.objectId);
   return { objects, obj };
 }
@@ -365,14 +395,14 @@ function renderProperties() {
 
 export function deleteSelectedObject() {
   if (!state.selection) return;
-  const objects = getPanelObjects(state.selection.panelId);
+  const objects = getPanelObjects(state.selection.side, state.selection.panelId);
   const obj = objects && objects.find((o) => o.id === state.selection.objectId);
   if (!objects || !obj) return;
   commit(() => {
     const i = objects.findIndex((o) => o.id === obj.id);
     if (i >= 0) objects.splice(i, 1);
   });
-  selectObject(null, null);
+  selectObject(null, null, null);
 }
 
 // ---- Public API ----

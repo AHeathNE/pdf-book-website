@@ -173,7 +173,11 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
 }
 .zine-panel--active { outline: 2px solid var(--accent); }
 .zine-panel--poster { outline: none; }
-.zine-panel-rotator { position: relative; }
+.zine-panel-zoom-layer { position: relative; }
+/* Two classes so this reliably beats the later, lower-specificity
+   `.pbw-page-inner { position: relative }` rule regardless of source
+   order — the centering transform in canvas.js requires `absolute`. */
+.zine-panel-content.pbw-page-inner { position: absolute; background: #fff; }
 .zine-panel-inner { position: relative; background: #fff; }
 
 .zine-panel-label {

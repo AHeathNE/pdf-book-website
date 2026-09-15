@@ -45,15 +45,28 @@ async function saveToIndexedDb() {
   await idbSet({ project: cloneProject(state.project), assets });
 }
 
-function remapImages(projectJson, remap) {
-  for (const panel of Object.values(projectJson.front || {})) {
+// A side is either a poster ({ objects: [...] }) or a panel grid (a map
+// of panelId -> { objects: [...] }) — detect which shape we're looking
+// at rather than assuming (pants-16up's back is a grid, unlike the other
+// two templates' poster back).
+function remapSideImages(sideJson, remap) {
+  if (!sideJson) return;
+  if (Array.isArray(sideJson.objects)) {
+    for (const obj of sideJson.objects) {
+      if (obj.type === 'image') obj.src = remap(obj.src);
+    }
+    return;
+  }
+  for (const panel of Object.values(sideJson)) {
     for (const obj of panel.objects || []) {
       if (obj.type === 'image') obj.src = remap(obj.src);
     }
   }
-  for (const obj of (projectJson.back && projectJson.back.objects) || []) {
-    if (obj.type === 'image') obj.src = remap(obj.src);
-  }
+}
+
+function remapImages(projectJson, remap) {
+  remapSideImages(projectJson.front, remap);
+  remapSideImages(projectJson.back, remap);
 }
 
 export async function restoreFromIndexedDb() {
