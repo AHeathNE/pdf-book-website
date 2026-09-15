@@ -373,10 +373,19 @@ function buildPanel(side, panelDef, panelData, panelW, panelH) {
     }
   }
 
+  // A child of `outer`, NOT `content` — `content` sits inside
+  // `zoomLayer`'s scale(zoom), so a label appended there would render at
+  // 10px * zoom (often under a pixel, effectively invisible) instead of
+  // a constant on-screen size. `outer` carries no transform at all, so
+  // the label's own size and its fixed-corner position stay legible
+  // regardless of zoom; rotating the label in place (around its own
+  // center, via its own transform) still conveys the panel's baked
+  // orientation without needing to inherit content's transform.
   const label = document.createElement('div');
   label.className = 'zine-panel-label';
   label.textContent = panelDef.label;
-  content.appendChild(label);
+  label.style.transform = panelDef.rotate ? `rotate(${panelDef.rotate}deg)` : '';
+  outer.appendChild(label);
 
   return outer;
 }
