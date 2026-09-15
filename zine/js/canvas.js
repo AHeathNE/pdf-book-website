@@ -378,12 +378,22 @@ function buildPanel(side, panelDef, panelData, panelW, panelH) {
   // 10px * zoom (often under a pixel, effectively invisible) instead of
   // a constant on-screen size. `outer` carries no transform at all, so
   // the label's own size and its fixed-corner position stay legible
-  // regardless of zoom; rotating the label in place (around its own
-  // center, via its own transform) still conveys the panel's baked
-  // orientation without needing to inherit content's transform.
+  // regardless of zoom.
+  //
+  // It's anchored at the panel's top-left and rotated in place (around
+  // its own center — the CSS default) to read down the left edge for
+  // 90/270. Rotating a short, wide box around its center swings its
+  // *painted* bounding box off to the side rather than keeping it pinned
+  // to the corner, since 90/270 swap which dimension is which;
+  // alignRotatedLabels (called once every panel is in the live DOM,
+  // since it needs a laid-out offsetWidth/offsetHeight) nudges left/top
+  // afterward to compensate, so the rotated box still hugs the corner.
+  // 180 needs no compensation — it preserves its own bounding box under
+  // center rotation.
   const label = document.createElement('div');
   label.className = 'zine-panel-label';
   label.textContent = panelDef.label;
+  if (panelDef.rotate === 90 || panelDef.rotate === 270) label.dataset.cornerRotate = '1';
   label.style.transform = panelDef.rotate ? `rotate(${panelDef.rotate}deg)` : '';
   outer.appendChild(label);
 
@@ -435,6 +445,23 @@ function buildPosterPanel(side, sideData, widthPx, heightPx) {
   }
 
   return outer;
+}
+
+// See buildPanel's comment on the `cornerRotate` labels: a label rotated
+// 90/270 around its own center (the CSS default) needs left/top nudged
+// afterward so its *painted*, swapped-dimension bounding box still hugs
+// the panel's top-left corner instead of drifting to a different edge.
+// Requires the label to already be laid out in the live DOM (reads
+// offsetWidth/offsetHeight), so this runs once after every panel for
+// the current side has been appended to the sheet.
+function alignRotatedLabels(sheetEl) {
+  const CORNER = 4; // matches .zine-panel-label's CSS left/top: 4px
+  sheetEl.querySelectorAll('.zine-panel-label[data-corner-rotate]').forEach((label) => {
+    const w = label.offsetWidth;
+    const h = label.offsetHeight;
+    label.style.left = `${CORNER + (h - w) / 2}px`;
+    label.style.top = `${CORNER + (w - h) / 2}px`;
+  });
 }
 
 function drawGridOverlay(sheetEl, template, side, widthPx, heightPx) {
@@ -499,6 +526,7 @@ export function renderCanvas() {
       const panelData = state.project[side][panelDef.id];
       sheet.appendChild(buildPanel(side, panelDef, panelData, panelW, panelH));
     }
+    alignRotatedLabels(sheet);
     drawGridOverlay(sheet, template, side, widthPx, heightPx);
   }
 }
