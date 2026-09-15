@@ -49,8 +49,8 @@ export function initSpinControls() {
   document.getElementById('resetSpinBtn').addEventListener('click', resetView);
 }
 
-// Whether the template's editing-only guides (panel divider lines, panel
-// labels, safe-margin box, cut-line) are shown.
+// Whether the template's editing-only guides (panel divider lines, safe-
+// margin box, cut-line, panel outline) are shown.
 let showGuides = localStorage.getItem('zine-show-guides') !== 'false';
 
 export function getShowGuides() {
@@ -67,4 +67,29 @@ export function initGuidesToggle() {
   const input = document.getElementById('showGuidesInput');
   input.checked = showGuides;
   input.addEventListener('change', () => setShowGuides(input.checked));
+}
+
+// Whether each panel's name/orientation label is shown — independent of
+// showGuides above, so you can turn off the grid/cut-line clutter while
+// keeping the labels, or vice versa, on any template. The label itself
+// always rotates with the panel's baked orientation (it's rendered
+// inside the same rotated content box as the panel's objects — see
+// canvas.js's buildPanel), so upright/upside-down/sideways is conveyed
+// by the label's own reading direction, not by extra text.
+let showLabels = localStorage.getItem('zine-show-labels') !== 'false';
+
+export function getShowLabels() {
+  return showLabels;
+}
+
+function setShowLabels(value) {
+  showLabels = value;
+  localStorage.setItem('zine-show-labels', String(showLabels));
+  notifyViewChange();
+}
+
+export function initLabelsToggle() {
+  const input = document.getElementById('showLabelsInput');
+  input.checked = showLabels;
+  input.addEventListener('change', () => setShowLabels(input.checked));
 }

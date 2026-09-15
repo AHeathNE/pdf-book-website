@@ -6,7 +6,7 @@ import {
   getTemplate, isPosterSide, getSideGrid, getSidePanels, getSideCutLine, getRowPanels,
 } from './templates.js';
 import {
-  getSpinDeg, onViewChange, getShowGuides,
+  getSpinDeg, onViewChange, getShowGuides, getShowLabels,
 } from './view.js';
 
 const SNAP_THRESHOLD = 8; // native px
@@ -475,6 +475,7 @@ export function renderCanvas() {
   sheet.style.width = `${widthPx * zoom}px`;
   sheet.style.height = `${heightPx * zoom}px`;
   sheet.classList.toggle('zine-guides-hidden', !getShowGuides());
+  sheet.classList.toggle('zine-labels-hidden', !getShowLabels());
 
   const template = getTemplate(state.project.templateId);
   const { side } = state;

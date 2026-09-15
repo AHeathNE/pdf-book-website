@@ -6,7 +6,7 @@ import {
   renderCanvas, initZoomControls, zoomIn, zoomOut, zoomReset,
 } from './canvas.js';
 import { initPanels, renderPanels, deleteSelectedObject } from './panels.js';
-import { initSpinControls, initGuidesToggle } from './view.js';
+import { initSpinControls, initGuidesToggle, initLabelsToggle } from './view.js';
 import { autosaveDebounced, restoreFromIndexedDb } from './storage.js';
 import { exportPdf } from './export-pdf.js';
 
@@ -58,6 +58,7 @@ async function main() {
   initZoomControls();
   initSpinControls();
   initGuidesToggle();
+  initLabelsToggle();
   wireToolbar();
   subscribe(() => {
     renderCanvas();
