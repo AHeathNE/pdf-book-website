@@ -106,6 +106,11 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
 .panel-list-item:hover { border-color: var(--accent); }
 .panel-list-item.active { border-color: var(--accent); background: #223051; }
 .panel-list-item.upside-down { transform: rotate(180deg); }
+/* 90/270 aren't rotated in place (unlike 180) — that would swap the
+   box's visual dimensions and overlap the row above/below, since a
+   transform doesn't reflow layout. A small icon indicates them instead. */
+.panel-list-item.rotated-cw::after { content: ' \21bb'; }
+.panel-list-item.rotated-ccw::after { content: ' \21ba'; }
 
 #canvasArea { flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; background: #15161a; position: relative; }
 

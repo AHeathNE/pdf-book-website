@@ -111,7 +111,10 @@ export const TEMPLATES = {
         { id: 'page-12', label: 'Page 12', row: 1, col: 2, rotate: 270 },
         { id: 'back-cover', label: 'Back Cover', row: 1, col: 3, rotate: 270 },
       ],
-      cutLine: { y: 0.5, x1: 0.125, x2: 0.875 },
+      // Touches the sheet's right edge (where Front Cover meets Back
+      // Cover, both in the rightmost column) and runs 3/4 of the width
+      // into the page from there.
+      cutLine: { y: 0.5, x1: 0.25, x2: 1 },
     },
     back: {
       grid: { columns: 4, rows: 2 },
@@ -125,7 +128,10 @@ export const TEMPLATES = {
         { id: 'page-2', label: 'Page 2', row: 1, col: 2, rotate: 90 },
         { id: 'page-1', label: 'Page 1', row: 1, col: 3, rotate: 90 },
       ],
-      cutLine: { y: 0.5, x1: 0.125, x2: 0.875 },
+      // Touches the sheet's right edge (where Front Cover meets Back
+      // Cover, both in the rightmost column) and runs 3/4 of the width
+      // into the page from there.
+      cutLine: { y: 0.5, x1: 0.25, x2: 1 },
     },
   },
 };

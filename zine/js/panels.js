@@ -156,8 +156,14 @@ function renderSideControls() {
       const item = document.createElement('div');
       item.className = 'panel-list-item';
       if (panelDef.id === state.activePanelId) item.classList.add('active');
+      // Rotating the whole label 90/270 via CSS transform paints outside
+      // its own grid cell (transforms don't reflow layout, so a rotated
+      // short-and-wide box overlaps the row above/below) — only 180 is
+      // safe to rotate in place since it doesn't swap the box's
+      // dimensions. 90/270 get a small icon instead.
       if (panelDef.rotate === 180) item.classList.add('upside-down');
-      else if (panelDef.rotate) item.style.transform = `rotate(${panelDef.rotate}deg)`;
+      else if (panelDef.rotate === 90) item.classList.add('rotated-cw');
+      else if (panelDef.rotate === 270) item.classList.add('rotated-ccw');
       item.textContent = panelDef.label;
       item.title = panelDef.rotate ? `${panelDef.label} — prints rotated ${panelDef.rotate}° on this sheet (use the spin controls to edit it comfortably)` : panelDef.label;
       item.addEventListener('click', () => {
