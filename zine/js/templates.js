@@ -38,8 +38,8 @@ export const TEMPLATES = {
         { id: 'page-1', label: 'Page 1', row: 0, col: 3, rotate: 180 },
         { id: 'page-5', label: 'Page 5', row: 1, col: 0, rotate: 0 },
         { id: 'page-6', label: 'Page 6', row: 1, col: 1, rotate: 0 },
-        { id: 'back-cover', label: 'Back Cover', row: 1, col: 2, rotate: 0 },
-        { id: 'front-cover', label: 'Front Cover', row: 1, col: 3, rotate: 0 },
+        { id: 'back-cover', label: 'Back', row: 1, col: 2, rotate: 0 },
+        { id: 'front-cover', label: 'Front', row: 1, col: 3, rotate: 0 },
       ],
       // Fractions of the full sheet's width/height — a horizontal slit
       // at the row boundary, spanning only the middle two columns.
@@ -69,10 +69,10 @@ export const TEMPLATES = {
         { id: 'page-3', label: 'Page 3', row: 0, col: 1, rotate: 180 },
         { id: 'page-2', label: 'Page 2', row: 0, col: 2, rotate: 180 },
         { id: 'page-1', label: 'Page 1', row: 0, col: 3, rotate: 180 },
-        { id: 'back-cover', label: 'Back Cover', row: 1, col: 0, rotate: 0 },
+        { id: 'back-cover', label: 'Back', row: 1, col: 0, rotate: 0 },
         { id: 'page-5', label: 'Page 5', row: 1, col: 1, rotate: 0 },
         { id: 'page-6', label: 'Page 6', row: 1, col: 2, rotate: 0 },
-        { id: 'front-cover', label: 'Front Cover', row: 1, col: 3, rotate: 0 },
+        { id: 'front-cover', label: 'Front', row: 1, col: 3, rotate: 0 },
       ],
       cutLine: null,
     },
@@ -105,11 +105,11 @@ export const TEMPLATES = {
         { id: 'page-13', label: 'Page 13', row: 0, col: 0, rotate: 90 },
         { id: 'page-10', label: 'Page 10', row: 0, col: 1, rotate: 90 },
         { id: 'page-9', label: 'Page 9', row: 0, col: 2, rotate: 90 },
-        { id: 'front-cover', label: 'Front Cover', row: 0, col: 3, rotate: 270 },
+        { id: 'front-cover', label: 'Front', row: 0, col: 3, rotate: 270 },
         { id: 'page-14', label: 'Page 14', row: 1, col: 0, rotate: 90 },
         { id: 'page-11', label: 'Page 11', row: 1, col: 1, rotate: 270 },
         { id: 'page-12', label: 'Page 12', row: 1, col: 2, rotate: 270 },
-        { id: 'back-cover', label: 'Back Cover', row: 1, col: 3, rotate: 270 },
+        { id: 'back-cover', label: 'Back', row: 1, col: 3, rotate: 270 },
       ],
       // Touches the sheet's right edge (where Front Cover meets Back
       // Cover, both in the rightmost column) and runs 3/4 of the width

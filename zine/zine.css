@@ -95,7 +95,7 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
   background: #1a1b1f;
   border: 1px solid var(--panel-border);
   border-radius: 4px;
-  padding: 6px 4px;
+  padding: 6px 2px;
   font-size: 10px;
   text-align: center;
   cursor: pointer;
