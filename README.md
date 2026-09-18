@@ -233,6 +233,11 @@ a published site.
   the front, page 2 is the back (print, then fold, plus a cut on
   templates that need one) — meant for double-sided printing (or printing
   both pages and pasting/taping them back-to-back).
+- **Export Template Guide**: a blank, printable reference sheet for
+  whichever template is currently selected — the same grid lines, cut
+  line, per-panel safe-margin boxes (using your current margin settings),
+  and page labels shown on screen, with no content. Handy as a fold-and-
+  cut cheat sheet, or to hand someone else a blank layout for a style.
 - **Autosave**: like the workstation, your work is saved to the browser's
   IndexedDB as you go. There's no Save/Open Project file yet — this tool
   is scoped to "design, then export to PDF."

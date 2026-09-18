@@ -444,6 +444,17 @@ function buildPosterPanel(side, sideData, widthPx, heightPx) {
     }
   }
 
+  // A poster has no per-panel identity, but still benefits from a
+  // label — same corner-anchored style as a grid panel, minus any
+  // rotation compensation since a poster is never rotated (panelDef.rotate
+  // is always 0 above). Reads "Poster" rather than "Front"/"Back" since
+  // what distinguishes this side is that it's a single full-sheet poster,
+  // not which physical side it happens to be.
+  const label = document.createElement('div');
+  label.className = 'zine-panel-label';
+  label.textContent = 'Poster';
+  outer.appendChild(label);
+
   return outer;
 }
 

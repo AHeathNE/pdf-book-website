@@ -9,6 +9,7 @@ import { initPanels, renderPanels, deleteSelectedObject } from './panels.js';
 import { initSpinControls, initGuidesToggle, initLabelsToggle } from './view.js';
 import { autosaveDebounced, restoreFromIndexedDb } from './storage.js';
 import { exportPdf } from './export-pdf.js';
+import { exportTemplateGuide } from './export-template.js';
 
 function setStatus(text) {
   document.getElementById('statusText').textContent = text;
@@ -30,6 +31,16 @@ function wireToolbar() {
     } catch (err) {
       console.error(err);
       setStatus(`Failed to export PDF: ${err.message}`);
+    }
+  });
+
+  document.getElementById('exportTemplateBtn').addEventListener('click', async () => {
+    try {
+      await exportTemplateGuide();
+      setStatus('Template guide exported.');
+    } catch (err) {
+      console.error(err);
+      setStatus(`Failed to export template guide: ${err.message}`);
     }
   });
 
