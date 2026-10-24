@@ -26,8 +26,15 @@ function setStatus(text) {
 // (confirmed directly: dispatching a synthetic 'input' with no focus
 // doubled the page size). Real typing always happens while the field has
 // focus, so requiring that filters out every non-genuine trigger.
+//
+// The catch: some browsers don't focus a number field when you click its
+// spinner arrows (or a color swatch), so the edit arrived with no focus and
+// was dropped — the box showed the new number but nothing changed. Pressing
+// on the field focuses it first, which also keeps the panel from being
+// rebuilt out from under a held-down spinner.
 function bindLiveField(el, eventName, applyFn) {
   let checkpointed = false;
+  el.addEventListener('pointerdown', () => { if (document.activeElement !== el) el.focus(); });
   el.addEventListener('focus', () => { checkpointed = false; });
   el.addEventListener(eventName, () => {
     if (document.activeElement !== el) return;
