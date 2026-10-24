@@ -133,6 +133,33 @@
             </select>
           </label>
         </section>
+        <section class="panel-section">
+          <h3>Dither</h3>
+          <label class="row" title="Reduces every page to two colors with a dot pattern — in the editor preview, the PDF, and the published book.">
+            <input id="ditherEnabledInput" type="checkbox" /> Dither the whole book
+          </label>
+          <div id="ditherControls">
+            <label>Method
+              <select id="ditherTypeSelect"></select>
+            </label>
+            <label>Dot size <span id="ditherDotSizeValue" class="hint-inline"></span>
+              <input id="ditherDotSizeInput" type="range" min="1" max="8" step="1" />
+            </label>
+            <label>Contrast <span id="ditherContrastValue" class="hint-inline"></span>
+              <input id="ditherContrastInput" type="range" min="-100" max="100" step="5" />
+            </label>
+            <label>Brightness <span id="ditherBrightnessValue" class="hint-inline"></span>
+              <input id="ditherBrightnessInput" type="range" min="-100" max="100" step="5" />
+            </label>
+            <label>Dot color
+              <input id="ditherInkInput" type="color" />
+            </label>
+            <label>Paper color
+              <input id="ditherPaperInput" type="color" />
+            </label>
+            <p class="hint">Dot size is how many page pixels one dot covers. Best judged at 100% zoom or more. Animated GIFs print as their first frame.</p>
+          </div>
+        </section>
       </aside>
 
       <main id="canvasArea">

@@ -3,6 +3,10 @@
 
 export const SCHEMA_VERSION = 1;
 
+// Dither methods the workstation can apply to the whole book (see
+// editor/js/dither.js for the algorithms themselves).
+export const DITHER_TYPE_IDS = ['floyd', 'atkinson', 'ordered', 'threshold'];
+
 let idCounter = 0;
 export function uid(prefix) {
   idCounter += 1;
@@ -25,6 +29,15 @@ export function newBook(overrides = {}) {
     margins: { top: 60, bottom: 60, inner: 70, outer: 50 },
     grid: { columns: 6, rows: 8, color: '#66b3ff', show: true, snap: true, origin: 'page' },
     covers: { front: true, back: true },
+    // One setting for the whole book: when enabled, every page is reduced to
+    // two colors (ink on paper) by the chosen method, in the editor preview
+    // and in every export. dotSize is how many page px one dot covers.
+    // Exports also fill in `images` ({ pageId: src }) — pre-rendered dithered
+    // pages the viewer lays over the live ones — which never exists in the
+    // editor's own copy of the book.
+    dither: {
+      enabled: false, type: 'floyd', dotSize: 2, contrast: 0, brightness: 0, ink: '#000000', paper: '#ffffff',
+    },
     pages: [newPage(), newPage()],
     ...overrides,
   };
@@ -113,9 +126,17 @@ export function normalizeBook(raw) {
     margins: { ...defaults.margins, ...(raw.margins || {}) },
     grid: { ...defaults.grid, ...(raw.grid || {}) },
     covers: { ...defaults.covers, ...(raw.covers || {}) },
+    dither: normalizeDither(raw.dither, defaults.dither),
     pages: Array.isArray(raw.pages) && raw.pages.length ? raw.pages.map(normalizePage) : defaults.pages,
   };
   return book;
+}
+
+function normalizeDither(raw, defaults) {
+  const merged = { ...defaults, ...(raw || {}) };
+  if (!DITHER_TYPE_IDS.includes(merged.type)) merged.type = defaults.type;
+  merged.enabled = merged.enabled === true;
+  return merged;
 }
 
 function normalizePage(raw) {

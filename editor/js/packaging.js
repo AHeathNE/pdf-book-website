@@ -54,7 +54,7 @@ export function packageAssets(book) {
   return { bookJson: clone, files };
 }
 
-function blobToDataUrl(blob) {
+export function blobToDataUrl(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result);

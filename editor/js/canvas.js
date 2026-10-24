@@ -1,6 +1,7 @@
 import { renderPage, applyStageBackground } from '../../shared/renderer.js';
 import { computeSpreads } from '../../shared/pagination.js';
 import { state, commit, checkpoint, selectObject } from './store.js';
+import { getDitherPreviewUrl, setDitherPreviewReadyHandler } from './dither-preview.js';
 
 const SNAP_THRESHOLD = 8; // native px
 
@@ -183,6 +184,19 @@ function drawGuides(pageInnerEl, book, side) {
   }
 }
 
+// The dither overlay sits above the objects, so their own selection outline
+// would be hidden under it — this frame is drawn above the overlay instead.
+function renderSelectionFrame(pageInnerEl, obj) {
+  const frame = document.createElement('div');
+  frame.className = 'pbw-guide pbw-selection-frame';
+  frame.style.left = `${obj.x}px`;
+  frame.style.top = `${obj.y}px`;
+  frame.style.width = `${obj.w}px`;
+  frame.style.height = `${obj.h}px`;
+  if (obj.rot) frame.style.transform = `rotate(${obj.rot}deg)`;
+  pageInnerEl.appendChild(frame);
+}
+
 function renderHandles(pageInnerEl, obj, onResizeStart) {
   const corners = [
     ['nw', obj.x, obj.y],
@@ -239,9 +253,11 @@ function buildPageSide(pageData, side, book) {
     }
   });
 
+  const ditherSrc = getDitherPreviewUrl(pageData, book);
   const { objectEls } = renderPage(pageData, inner, {
     editable: true,
     onSelect: (objectId, evt) => startObjectDrag(pageData, objectId, side, evt),
+    ditherSrc,
   });
 
   drawGuides(inner, book, side);
@@ -251,6 +267,7 @@ function buildPageSide(pageData, side, book) {
     const el = objectEls.get(state.selection.objectId);
     if (obj && el) {
       el.classList.add('pbw-object--selected');
+      if (ditherSrc) renderSelectionFrame(inner, obj);
       renderHandles(inner, obj, (corner, evt) => startObjectResize(pageData, obj.id, side, corner, evt));
     }
   }
@@ -442,6 +459,7 @@ export function renderCanvas() {
 }
 
 window.addEventListener('resize', () => renderCanvas());
+setDitherPreviewReadyHandler(renderCanvas);
 
 // A plain window resize listener misses internal layout shifts that
 // change #spreadViewport's actual available space without the window

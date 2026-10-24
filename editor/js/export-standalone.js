@@ -1,5 +1,6 @@
 import { state } from './store.js';
-import { packageAssetsInline } from './packaging.js';
+import { packageAssetsInline, blobToDataUrl } from './packaging.js';
+import { buildDitherPageImages } from './dither-export.js';
 
 function setStatus(text) {
   const el = document.getElementById('statusText');
@@ -66,6 +67,11 @@ export async function exportStandalone() {
   ]);
 
   const bookForExport = await packageAssetsInline(state.book);
+  const ditherImages = await buildDitherPageImages(state.book, (n, total) => setStatus(`Dithering page ${n} of ${total}…`));
+  if (ditherImages.size) {
+    bookForExport.dither.images = {};
+    for (const [pageId, blob] of ditherImages) bookForExport.dither.images[pageId] = await blobToDataUrl(blob);
+  }
   const bodyMarkup = extractViewerBody(viewerIndexHtml);
   const sharedScript = [schemaJs, rendererJs, paginationJs].map(stripExports).join('\n\n');
   const viewerScript = stripImports(viewerJs);

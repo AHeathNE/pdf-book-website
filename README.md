@@ -133,6 +133,22 @@ hasn't been tried yet.
   option: Stretch (fills exactly, distorting), Fill (crops to fill,
   keeps aspect — the default), Fit (shows the whole image, may letterbox),
   or Repeat (tiles at its original size).
+- **Dither**: one setting that reduces every page of the book to two
+  colors with a dot pattern, in the editor preview and in every export.
+  Choose the method — **Floyd–Steinberg**, **Atkinson** (cleaner
+  highlights and shadows), **Ordered (halftone)** or plain **Threshold**
+  (the same four the thermal-printer projects use) — plus **dot size**
+  (how many page pixels one dot covers), **contrast**, **brightness**, and
+  the **dot** and **paper** colors (black on white by default). The
+  preview is an overlay on the live page, so you keep editing normally;
+  it rebuilds a moment after you stop making changes, and is best judged
+  at 100% zoom or more (smaller than that the dots are sampled down and
+  look noisy). Exports: the PDF embeds dithered pages as lossless PNG;
+  the website zip and standalone HTML include a pre-rendered dithered
+  image of each page that the viewer lays over the live page, so links
+  still work through it. Animated GIFs dither as their first frame (the
+  rasterizing step can't capture animation), and the viewer's backdrop
+  behind the book is left as it is.
 - **Palette** (above the canvas): add Text, Image, GIF, or Link objects to
   whichever page you last clicked into. Drag objects to move them (drag
   one across the boundary between two facing pages to move it onto the

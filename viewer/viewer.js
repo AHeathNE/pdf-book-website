@@ -85,7 +85,13 @@ async function main() {
         inner.style.transform = `scale(${scale})`;
       }
       pageEl.appendChild(inner);
-      if (pageData) renderPage(pageData, inner, { editable: false });
+      if (pageData) {
+        // Dithered books ship each page pre-rendered (see book.dither.images)
+        // as an overlay on the live page, which stays underneath so its links
+        // keep working.
+        const ditherSrc = book.dither.images ? book.dither.images[pageData.id] : null;
+        renderPage(pageData, inner, { editable: false, ditherSrc });
+      }
 
       container.appendChild(pageEl);
     });

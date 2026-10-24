@@ -7,6 +7,8 @@ import {
 import {
   unitToPx, unitStep, formatForUnit, pxToPt, ptToPx,
 } from './units.js';
+import { DITHER_TYPE_IDS } from '../../shared/schema.js';
+import { DITHER_LABELS } from './dither.js';
 
 function setStatus(text) {
   const el = document.getElementById('statusText');
@@ -441,6 +443,51 @@ function syncBackgroundInputs() {
   if (bg.type === 'image') document.getElementById('backgroundFitSelect').value = bg.fit || 'cover';
 }
 
+// ---- Dither ----
+
+// Sliders only commit when released ('change'), not on every 'input' tick:
+// each commit invalidates the dither preview, and rebuilding it is
+// expensive enough that doing it mid-drag would just stutter.
+const DITHER_SLIDERS = [
+  ['ditherDotSizeInput', 'ditherDotSizeValue', 'dotSize', (v) => `${v} px`],
+  ['ditherContrastInput', 'ditherContrastValue', 'contrast', (v) => String(v)],
+  ['ditherBrightnessInput', 'ditherBrightnessValue', 'brightness', (v) => String(v)],
+];
+
+function initDitherControls() {
+  const typeSelect = document.getElementById('ditherTypeSelect');
+  for (const id of DITHER_TYPE_IDS) typeSelect.add(new Option(DITHER_LABELS[id], id));
+
+  document.getElementById('ditherEnabledInput').addEventListener('change', (e) => {
+    commit((book) => { book.dither.enabled = e.target.checked; });
+  });
+  typeSelect.addEventListener('change', () => commit((book) => { book.dither.type = typeSelect.value; }));
+  for (const [inputId, valueId, key, format] of DITHER_SLIDERS) {
+    const input = document.getElementById(inputId);
+    input.addEventListener('input', () => { document.getElementById(valueId).textContent = format(Number(input.value)); });
+    input.addEventListener('change', () => commit((book) => { book.dither[key] = Number(input.value); }));
+  }
+  document.getElementById('ditherInkInput').addEventListener('change', (e) => {
+    commit((book) => { book.dither.ink = e.target.value; });
+  });
+  document.getElementById('ditherPaperInput').addEventListener('change', (e) => {
+    commit((book) => { book.dither.paper = e.target.value; });
+  });
+}
+
+function syncDitherInputs() {
+  const d = state.book.dither;
+  document.getElementById('ditherEnabledInput').checked = d.enabled;
+  document.getElementById('ditherControls').style.display = d.enabled ? '' : 'none';
+  document.getElementById('ditherTypeSelect').value = d.type;
+  for (const [inputId, valueId, key, format] of DITHER_SLIDERS) {
+    document.getElementById(inputId).value = d[key];
+    document.getElementById(valueId).textContent = format(d[key]);
+  }
+  document.getElementById('ditherInkInput').value = d.ink;
+  document.getElementById('ditherPaperInput').value = d.paper;
+}
+
 // ---- Palette (add objects) ----
 
 export function getActivePage() {
@@ -808,6 +855,7 @@ export function initPanels() {
   initPageControls();
   initBookSetup();
   initBackgroundControls();
+  initDitherControls();
   initPalette();
 }
 
@@ -815,5 +863,6 @@ export function renderPanels() {
   renderPageList();
   syncBookSetupInputs();
   syncBackgroundInputs();
+  syncDitherInputs();
   renderProperties();
 }

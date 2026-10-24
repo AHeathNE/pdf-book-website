@@ -244,6 +244,7 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
      alignment even under a full-bleed image. */
   z-index: 10000;
 }
+.pbw-selection-frame { border: 2px solid var(--accent); box-sizing: border-box; }
 .pbw-guide--margin { border: 1px dashed rgba(80, 140, 255, 0.85); }
 .pbw-guide--grid-v, .pbw-guide--grid-h { opacity: 0.5; }
 
@@ -261,7 +262,7 @@ label.row input[type="checkbox"] { flex: 0 0 auto; }
   z-index: 10001;
 }
 
-#propertiesPanel .hint { color: var(--text-dim); font-size: 12px; }
+#propertiesPanel .hint, .panel-section .hint { color: var(--text-dim); font-size: 12px; }
 #propertiesPanel .prop-row { margin-bottom: 10px; }
 #propertiesPanel .prop-row label { margin: 0 0 4px; }
 #propertiesPanel textarea {

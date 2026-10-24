@@ -71,6 +71,27 @@ function buildLinkObject(obj) {
   return a;
 }
 
+// A pre-rendered dithered copy of the whole page (see book.dither), laid
+// over the live objects. Inert, so links and the editor's own dragging still
+// work through it. Pixelated so the dots stay crisp when scaled up.
+function buildDitherOverlay(src) {
+  const img = document.createElement('img');
+  img.className = 'pbw-dither-overlay';
+  img.src = src;
+  img.alt = '';
+  img.draggable = false;
+  img.style.position = 'absolute';
+  img.style.left = '0';
+  img.style.top = '0';
+  img.style.width = '100%';
+  img.style.height = '100%';
+  img.style.zIndex = '9000'; // above every object (obj.z), below the editor's guides/handles
+  img.style.pointerEvents = 'none';
+  img.style.imageRendering = 'pixelated';
+  img.style.display = 'block';
+  return img;
+}
+
 const BUILDERS = { text: buildTextObject, image: buildImageObject, link: buildLinkObject };
 
 // How a background image fills its box: 'cover' (Fill — crop to fill,
@@ -114,10 +135,11 @@ function applyPageBackground(containerEl, background) {
  * callers (the editor canvas) can attach selection/drag/resize behavior.
  *
  * options.editable adds a class + click->onSelect wiring; it does not add
- * drag/resize itself.
+ * drag/resize itself. options.ditherSrc, when set, lays that dithered image
+ * over the whole page.
  */
 export function renderPage(pageData, containerEl, options = {}) {
-  const { editable = false, onSelect = null } = options;
+  const { editable = false, onSelect = null, ditherSrc = null } = options;
   containerEl.innerHTML = '';
   containerEl.style.position = 'relative';
   containerEl.style.overflow = 'hidden';
@@ -141,6 +163,7 @@ export function renderPage(pageData, containerEl, options = {}) {
     containerEl.appendChild(el);
     objectEls.set(obj.id, el);
   }
+  if (ditherSrc) containerEl.appendChild(buildDitherOverlay(ditherSrc));
   return { objectEls };
 }
 
