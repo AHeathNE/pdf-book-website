@@ -79,6 +79,8 @@ export function newTextObject(overrides = {}) {
     fontSize: 33,
     color: '#111111',
     align: 'left',
+    bold: false,
+    italic: false,
     // Keeps the box from ending up shorter than its text (editor only; see
     // editor/js/text-fit.js). On for new text; normalizeObject leaves
     // objects from before this existed off, so they don't change.

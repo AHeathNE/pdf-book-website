@@ -20,6 +20,9 @@ function buildTextObject(obj) {
   applyBoxStyle(el, obj);
   el.style.fontFamily = obj.fontFamily;
   el.style.fontSize = `${obj.fontSize}px`;
+  // A font with no real bold/italic face gets the browser's synthesized one.
+  el.style.fontWeight = obj.bold ? 'bold' : 'normal';
+  el.style.fontStyle = obj.italic ? 'italic' : 'normal';
   el.style.color = obj.color;
   el.style.textAlign = obj.align;
   el.style.overflow = 'hidden';

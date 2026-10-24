@@ -158,7 +158,9 @@ hasn't been tried yet.
   locked all the time. Rotation is set numerically in the Properties panel.
 - **Properties** (right panel): edit the selected object's position, size,
   rotation, and type-specific fields (text/font/color, image source/alt/
-  link, or link URL/label/colors). Text boxes are fixed-size and clip
+  link, or link URL/label/colors). Text has **Bold** and **Italic**
+  checkboxes too (a font without its own bold/italic face gets the
+  browser's synthesized one). Text boxes are fixed-size and clip
   anything that doesn't fit, so text has a **Grow box to fit text** toggle
   (on for new text): the box gets taller whenever a bigger font or more
   text needs the room, and can't be dragged shorter than its text. It only

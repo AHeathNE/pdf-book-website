@@ -742,6 +742,22 @@ function renderProperties() {
 
     panel.appendChild(field('Font size (pt)', fontSizeInput(obj)));
 
+    const styleRow = document.createElement('div');
+    styleRow.className = 'row';
+    for (const [key, text] of [['bold', 'Bold'], ['italic', 'Italic']]) {
+      const label = document.createElement('label');
+      label.className = 'row';
+      label.title = `${text} — if the font has no ${text.toLowerCase()} version of its own, the browser fakes one.`;
+      const box = document.createElement('input');
+      box.type = 'checkbox';
+      box.checked = !!obj[key];
+      box.addEventListener('change', () => commit(() => { obj[key] = box.checked; }));
+      label.appendChild(box);
+      label.appendChild(document.createTextNode(` ${text}`));
+      styleRow.appendChild(label);
+    }
+    panel.appendChild(styleRow);
+
     const growRow = document.createElement('label');
     growRow.className = 'row';
     growRow.title = 'Makes the box taller whenever the text needs more room, instead of cutting it off.';

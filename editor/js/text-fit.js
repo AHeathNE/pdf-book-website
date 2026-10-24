@@ -29,6 +29,8 @@ function measureHeight(obj) {
   el.style.width = `${obj.w}px`;
   el.style.fontFamily = obj.fontFamily;
   el.style.fontSize = `${obj.fontSize}px`;
+  el.style.fontWeight = obj.bold ? 'bold' : 'normal';
+  el.style.fontStyle = obj.italic ? 'italic' : 'normal';
   el.style.textAlign = obj.align;
   el.textContent = obj.content;
   return Math.ceil(el.scrollHeight);
@@ -40,7 +42,7 @@ export function fitAutoGrowText(book) {
   for (const page of book.pages) {
     for (const obj of page.objects) {
       if (obj.type !== 'text' || !obj.autoGrow) continue;
-      const sig = [obj.content, obj.fontFamily, obj.fontSize, obj.w, obj.align].join('\u0000');
+      const sig = [obj.content, obj.fontFamily, obj.fontSize, obj.bold, obj.italic, obj.w, obj.align].join('\u0000');
       let entry = measured.get(obj.id);
       if (!entry || entry.sig !== sig) {
         entry = { sig, h: measureHeight(obj) };
