@@ -735,6 +735,17 @@ function renderProperties() {
 
     panel.appendChild(field('Font size (pt)', fontSizeInput(obj)));
 
+    const growRow = document.createElement('label');
+    growRow.className = 'row';
+    growRow.title = 'Makes the box taller whenever the text needs more room, instead of cutting it off.';
+    const growCheckbox = document.createElement('input');
+    growCheckbox.type = 'checkbox';
+    growCheckbox.checked = !!obj.autoGrow;
+    growCheckbox.addEventListener('change', () => commit(() => { obj.autoGrow = growCheckbox.checked; }));
+    growRow.appendChild(growCheckbox);
+    growRow.appendChild(document.createTextNode(' Grow box to fit text'));
+    panel.appendChild(growRow);
+
     const color = document.createElement('input');
     color.type = 'color';
     color.value = obj.color;

@@ -158,7 +158,12 @@ hasn't been tried yet.
   locked all the time. Rotation is set numerically in the Properties panel.
 - **Properties** (right panel): edit the selected object's position, size,
   rotation, and type-specific fields (text/font/color, image source/alt/
-  link, or link URL/label/colors). Restack it (front/back) here, and
+  link, or link URL/label/colors). Text boxes are fixed-size and clip
+  anything that doesn't fit, so text has a **Grow box to fit text** toggle
+  (on for new text): the box gets taller whenever a bigger font or more
+  text needs the room, and can't be dragged shorter than its text. It only
+  ever grows — it won't shrink back — and text from projects made before
+  the option existed keeps it off. Restack it (front/back) here, and
   delete it either with the Delete button or by pressing **Delete** /
   **Backspace** with it selected.
 - **Cut/copy/paste**: Ctrl+X / Ctrl+C / Ctrl+V (⌘ on Mac) on a selected

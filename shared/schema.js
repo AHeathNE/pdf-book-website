@@ -79,6 +79,10 @@ export function newTextObject(overrides = {}) {
     fontSize: 33,
     color: '#111111',
     align: 'left',
+    // Keeps the box from ending up shorter than its text (editor only; see
+    // editor/js/text-fit.js). On for new text; normalizeObject leaves
+    // objects from before this existed off, so they don't change.
+    autoGrow: true,
     w: 240,
     h: 80,
     ...overrides,
@@ -151,5 +155,7 @@ function normalizePage(raw) {
 function normalizeObject(raw) {
   const type = raw.type || 'text';
   const factory = type === 'image' ? newImageObject : type === 'link' ? newLinkObject : newTextObject;
-  return { ...factory(), ...raw, id: raw.id || uid('obj') };
+  const obj = { ...factory(), ...raw, id: raw.id || uid('obj') };
+  if (obj.type === 'text' && raw.autoGrow === undefined) obj.autoGrow = false;
+  return obj;
 }

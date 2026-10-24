@@ -1,4 +1,5 @@
 import { newBook, cloneBook, normalizeBook } from '../../shared/schema.js';
+import { fitAutoGrowText } from './text-fit.js';
 
 const HISTORY_LIMIT = 60;
 
@@ -56,6 +57,7 @@ export function checkpoint() {
 export function commit(mutator, { history = true } = {}) {
   if (history) checkpoint();
   mutator(state.book);
+  fitAutoGrowText(state.book);
   notify();
 }
 
