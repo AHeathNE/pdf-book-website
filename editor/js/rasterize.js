@@ -18,7 +18,10 @@ async function renderRotatedObjectCanvas(obj) {
   document.body.appendChild(holder);
   try {
     const unrotated = { ...obj, x: 0, y: 0, rot: 0 };
-    renderPage({ background: null, objects: [unrotated] }, holder, { editable: false });
+    // A null page background means white to renderPage, which would paint
+    // an opaque white box behind a rotated image's transparent areas and hide
+    // whatever sits underneath it — so ask for a transparent one explicitly.
+    renderPage({ background: { type: 'color', value: 'transparent' }, objects: [unrotated] }, holder, { editable: false });
     return await html2canvas(holder, {
       width: obj.w, height: obj.h, scale: 1, useCORS: true, backgroundColor: null,
     });
