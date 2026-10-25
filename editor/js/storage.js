@@ -52,7 +52,13 @@ export async function restoreFromIndexedDb() {
 
   const urlMap = new Map();
   for (const { url, filename, blob } of record.assets) {
-    urlMap.set(url, registerAsset(blob, filename));
+    // Firefox keeps a blob read back from IndexedDB tied to its stored
+    // record: the next autosave rewrites that record, and every restored
+    // image then becomes unreadable — blank images after the first edit
+    // (confirmed: blob.arrayBuffer() fails). Copying the bytes into a plain
+    // in-memory blob cuts that tie.
+    const detached = new Blob([await blob.arrayBuffer()], { type: blob.type });
+    urlMap.set(url, registerAsset(detached, filename));
   }
   const bookJson = record.book;
   const remap = (v) => (typeof v === 'string' && urlMap.has(v) ? urlMap.get(v) : v);
