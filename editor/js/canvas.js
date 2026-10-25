@@ -1,7 +1,9 @@
 import { renderPage, applyStageBackground } from '../../shared/renderer.js';
 import { computeSpreads } from '../../shared/pagination.js';
 import { state, commit, checkpoint, selectObject } from './store.js';
-import { getDitherPreviewUrl, setDitherPreviewReadyHandler } from './dither-preview.js';
+import {
+  getDitherPreviewUrl, setDitherPreviewReadyHandler, pauseDitherPreview, resumeDitherPreview,
+} from './dither-preview.js';
 
 const SNAP_THRESHOLD = 8; // native px
 
@@ -302,6 +304,7 @@ function startObjectDrag(pageData, objectId, side, evt) {
   const startMouse = { x: evt.clientX, y: evt.clientY };
   const startBox = { x: obj.x, y: obj.y };
   let moved = false;
+  pauseDitherPreview();
 
   function onMove(e) {
     const dx = (e.clientX - startMouse.x) / zoom;
@@ -364,6 +367,7 @@ function startObjectDrag(pageData, objectId, side, evt) {
   function onUp() {
     window.removeEventListener('mousemove', onMove);
     window.removeEventListener('mouseup', onUp);
+    resumeDitherPreview();
   }
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);
@@ -378,6 +382,7 @@ function startObjectResize(pageData, objectId, side, corner, evt) {
   const start = { x: obj.x, y: obj.y, w: obj.w, h: obj.h };
   const ratio = start.w / start.h;
   const MIN = 16;
+  pauseDitherPreview();
 
   function onMove(e) {
     const dx = (e.clientX - startMouse.x) / zoom;
@@ -427,6 +432,7 @@ function startObjectResize(pageData, objectId, side, corner, evt) {
   function onUp() {
     window.removeEventListener('mousemove', onMove);
     window.removeEventListener('mouseup', onUp);
+    resumeDitherPreview();
   }
   window.addEventListener('mousemove', onMove);
   window.addEventListener('mouseup', onUp);

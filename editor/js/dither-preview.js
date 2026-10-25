@@ -8,14 +8,27 @@ import { ditherToDots, canvasToPngBlob } from './dither.js';
 // results are cached per page by a key covering everything that affects the
 // pixels, rebuilt a moment after edits stop, and until then the page just
 // shows its live, undithered content.
+//
+// While a drag/resize is in progress (pauseDitherPreview), nothing is
+// rebuilt: a rebuild is heavy enough to stall the page, and finishing mid-
+// drag would redraw the whole canvas under the cursor. It starts right
+// after the mouse is released instead (resumeDitherPreview).
 
 const REBUILD_DELAY_MS = 350;
+const BUILDING_MESSAGE = 'Updating dither preview…';
 
 const cache = new Map(); // pageId -> { key, url } (url null if rendering failed — don't retry until the key changes)
 const queue = new Set();
 let timer = null;
 let running = false;
+let paused = false;
+let startNow = false; // set on resume: the next rebuild skips the usual delay
 let onReady = () => {};
+
+function setStatus(text) {
+  const el = document.getElementById('statusText');
+  if (el) el.textContent = text;
+}
 
 export function setDitherPreviewReadyHandler(fn) {
   onReady = fn;
@@ -34,7 +47,10 @@ function clearCache() {
 
 async function drain() {
   if (running) return;
+  startNow = false;
+  if (!queue.size) return;
   running = true;
+  setStatus(BUILDING_MESSAGE);
   try {
     while (queue.size) {
       const [id] = queue;
@@ -60,8 +76,25 @@ async function drain() {
   } finally {
     running = false;
   }
-  onReady();
+  const el = document.getElementById('statusText');
+  if (el && el.textContent === BUILDING_MESSAGE) setStatus('Ready.');
+  if (!paused) onReady();
 }
+
+export function pauseDitherPreview() {
+  paused = true;
+  clearTimeout(timer);
+}
+
+export function resumeDitherPreview() {
+  if (!paused) return;
+  paused = false;
+  startNow = true;
+  onReady(); // re-render: any page whose dither is stale gets scheduled, with no delay
+}
+
+// A mouse released outside the window can leave a drag with no mouseup.
+window.addEventListener('blur', resumeDitherPreview);
 
 // The dithered image for this page if it's current, else null (and one is
 // scheduled, which calls the ready handler when it lands).
@@ -72,8 +105,9 @@ export function getDitherPreviewUrl(page, book) {
   }
   const entry = cache.get(page.id);
   if (entry && entry.key === keyFor(page, book)) return entry.url;
+  if (paused) return null; // resumeDitherPreview() re-renders, which comes back through here
   queue.add(page.id);
   clearTimeout(timer);
-  timer = setTimeout(drain, REBUILD_DELAY_MS);
+  timer = setTimeout(drain, startNow ? 0 : REBUILD_DELAY_MS);
   return null;
 }
