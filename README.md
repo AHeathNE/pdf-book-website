@@ -141,7 +141,10 @@ hasn't been tried yet.
   (how many page pixels one dot covers), **contrast**, **brightness**, and
   the **dot** and **paper** colors (black on white by default). The
   preview is an overlay on the live page, so you keep editing normally;
-  it rebuilds a moment after you stop making changes, and is best judged
+  while a change is in progress you see the live page, and the dithered
+  version comes back within about a second of your last change
+  (starting right after you let go of the mouse when dragging or resizing; the
+  status bar shows "Updating dither preview…" meanwhile). It is best judged
   at 100% zoom or more (smaller than that the dots are sampled down and
   look noisy). Exports: the PDF embeds dithered pages as lossless PNG;
   the website zip and standalone HTML include a pre-rendered dithered
